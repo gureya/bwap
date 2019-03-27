@@ -54,11 +54,20 @@ void ScanMode::printParameters() {
          _exit_when_finished ? "Yes" : "No");
 }
 
+void ScanMode::processSegmentAddition(const MemorySegment& segment) {
+
+  if (segment.length() > (1UL << 14)) {
+    segment.print();
+    place_pages_weighted_initial(segment);
+  }
+
+}
+
 void ScanMode::scannerThread() {
   // start with everything interleaved
-  double prev_stall_rate = std::numeric_limits<double>::infinity();
-  double best_stall_rate = std::numeric_limits<double>::infinity();
-  double stall_rate;
+  //double prev_stall_rate = std::numeric_limits<double>::infinity();
+  //double best_stall_rate = std::numeric_limits<double>::infinity();
+  //double stall_rate;
 
   // pin thread to core zero
   // FIXME(dgureya): is this required when using likwid? - I don't think so
@@ -68,31 +77,31 @@ void ScanMode::scannerThread() {
   // DIEIF(sched_setaffinity(syscall(SYS_gettid), sizeof(mask), &mask) < 0,
   //		"could not set affinity for hw monitor thread");
 
-  get_stall_rate_v2();
-  sleep(_wait_start);
+  //get_stall_rate_v2();
+  //sleep(_wait_start);
 
   // dump mapping information
   MemoryMap &segments = MemoryMap::getInstance();
-  // segments.print();
+  segments.print();
   //set sum_ww & sum_nww & initialize the weights!
-  get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
+  //get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
 
-  int i;
-  for (i = 0; i <= sum_nww; i += ADAPTATION_STEP) {
-    LINFOF("checking ratio %d", i);
-    place_all_pages(segments, i);
-    sleep(1);
-    unstickymem_log(i);
-    stall_rate = get_average_stall_rate(_num_polls, _poll_sleep,
-                                        _num_poll_outliers);
-    //print stall_rate to a file for debugging!
-    unstickymem_log(i, stall_rate);
-    LINFOF("Ratio: %d StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
-           stall_rate, prev_stall_rate, best_stall_rate);
-    // compute the minimum rate
-    best_stall_rate = std::min(best_stall_rate, stall_rate);
-    prev_stall_rate = stall_rate;
-  }
+  /*int i;
+   for (i = 0; i <= sum_nww; i += ADAPTATION_STEP) {
+   LINFOF("checking ratio %d", i);
+   place_all_pages(segments, i);
+   sleep(1);
+   unstickymem_log(i);
+   stall_rate = get_average_stall_rate(_num_polls, _poll_sleep,
+   _num_poll_outliers);
+   //print stall_rate to a file for debugging!
+   unstickymem_log(i, stall_rate);
+   LINFOF("Ratio: %d StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
+   stall_rate, prev_stall_rate, best_stall_rate);
+   // compute the minimum rate
+   best_stall_rate = std::min(best_stall_rate, stall_rate);
+   prev_stall_rate = stall_rate;
+   }*/
 
   if (_exit_when_finished) {
     exit(0);
