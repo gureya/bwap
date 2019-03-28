@@ -74,6 +74,10 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
    set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
    numa_get_mems_allowed()->size + 1);*/
 
+  //read the weights
+  char weights[] = "/home/dgureya/devs/unstickymem/config/weights_1w.txt";
+  read_weights(weights);
+
   // remove the previous unstickymem library segment (if exists)
   // boost::interprocess::shared_memory_object::remove("unstickymem");
   // initialize the memory

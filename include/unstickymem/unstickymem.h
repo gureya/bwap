@@ -10,7 +10,7 @@ extern "C" {
 // the number of worker nodes
 extern int OPT_NUM_WORKERS_VALUE;
 // Maximum number of nodes in the system
-#define MAX_NODES 8
+#define MAX_NODES 2
 // A structure to hold the nodes information
 typedef struct rec {
   int id;

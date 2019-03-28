@@ -57,7 +57,7 @@ void ScanMode::printParameters() {
 void ScanMode::processSegmentAddition(const MemorySegment& segment) {
 
   if (segment.length() > (1UL << 14)) {
-    segment.print();
+    //segment.print();
     place_pages_weighted_initial(segment);
   }
 
@@ -81,8 +81,8 @@ void ScanMode::scannerThread() {
   //sleep(_wait_start);
 
   // dump mapping information
-  MemoryMap &segments = MemoryMap::getInstance();
-  segments.print();
+  //MemoryMap &segments = MemoryMap::getInstance();
+  //segments.print();
   //set sum_ww & sum_nww & initialize the weights!
   //get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
 
