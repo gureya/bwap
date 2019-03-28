@@ -31,6 +31,7 @@ double sum_ww = 0;
 double sum_nww = 0;
 // number of workers
 static bool OPT_NUM_WORKERS = false;
+static bool WEIGHTS = false;
 int OPT_NUM_WORKERS_VALUE = 1;
 
 namespace unstickymem {
@@ -44,6 +45,15 @@ void read_config(void) {
   OPT_NUM_WORKERS = std::getenv("UNSTICKYMEM_WORKERS") != nullptr;
   if (OPT_NUM_WORKERS) {
     OPT_NUM_WORKERS_VALUE = std::stoi(std::getenv("UNSTICKYMEM_WORKERS"));
+  }
+
+  WEIGHTS = std::getenv("BWAP_WEIGHTS") != nullptr;
+  if (WEIGHTS) {
+    char weights[] = std::getenv("BWAP_WEIGHTS");
+    read_weights(weights);
+  } else {
+    LDEBUG("Sorry, Weights have not been provided!");
+    exit (EXIT_FAILURE);
   }
 }
 
@@ -63,7 +73,7 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
   //initialize_likwid();
 
   // parse and display the configuration
-  //read_config();
+  read_config();
   //print_config();
 
   //set sum_ww & sum_nww & initialize the weights!
@@ -73,10 +83,6 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
   /*LDEBUG("Setting default memory policy to interleaved");
    set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
    numa_get_mems_allowed()->size + 1);*/
-
-  //read the weights
-  char weights[] = "/home/dgureya/devs/unstickymem/config/weights_1w.txt";
-  read_weights(weights);
 
   // remove the previous unstickymem library segment (if exists)
   // boost::interprocess::shared_memory_object::remove("unstickymem");
@@ -156,7 +162,7 @@ void read_weights(char filename[]) {
 
   fp = fopen(filename, "r");
   if (fp == NULL) {
-    printf("Weights have not been provided!\n");
+    printf("Weights have not been provided, empty file or wrong file name!\n");
     exit (EXIT_FAILURE);
   }
 

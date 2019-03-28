@@ -103,9 +103,9 @@ void ScanMode::scannerThread() {
    prev_stall_rate = stall_rate;
    }*/
 
-  if (_exit_when_finished) {
-    exit(0);
-  }
+  //if (_exit_when_finished) {
+   // exit(0);
+  //}
 }
 
 void ScanMode::start() {
