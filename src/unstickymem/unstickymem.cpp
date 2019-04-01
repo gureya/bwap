@@ -49,7 +49,7 @@ void read_config(void) {
 
   WEIGHTS = std::getenv("BWAP_WEIGHTS") != nullptr;
   if (WEIGHTS) {
-    char weights[] = std::getenv("BWAP_WEIGHTS");
+    char* weights = std::getenv("BWAP_WEIGHTS");
     read_weights(weights);
   } else {
     LDEBUG("Sorry, Weights have not been provided!");
@@ -183,12 +183,12 @@ void read_weights(char filename[]) {
     j++;
   }
 
-  /* int i;
+   int i;
    printf("Initial Weights:\t");
    for (i = 0; i < MAX_NODES; i++) {
    printf("id: %d w: %.1f\t", nodes_info[i].id, nodes_info[i].weight);
    }
-   printf("\n");*/
+   printf("\n");
 
   fclose(fp);
   if (line)
