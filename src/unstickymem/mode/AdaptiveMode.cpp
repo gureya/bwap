@@ -95,7 +95,7 @@ void AdaptiveMode::adaptiveThread() {
       // just make sure that its not something transient...!
       LINFO("Hmm... Is this the best we can do?");
       if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
-                                 _num_poll_outliers * 2)) {
+                                 _num_poll_outliers * 2) > (best_stall_rate * 1.001)) {
         LINFO("I guess so!");
         break;
       }

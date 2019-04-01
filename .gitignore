@@ -178,3 +178,6 @@ cmake_uninstall.cmake
 /bench-shared
 /test_hello_world
 /test_allocations
+
+# .txt files
+*.txt

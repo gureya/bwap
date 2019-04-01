@@ -92,7 +92,7 @@ void WeightedAdaptiveMode::adaptiveThread() {
                                         _num_poll_outliers);
     //print stall_rate to a file for debugging!
     unstickymem_log(i, stall_rate);
-    LINFOF("Ratio: %d StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
+    LINFOF("Ratio: %lf StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
            stall_rate, prev_stall_rate, best_stall_rate);
 
     // compute the minimum rate
@@ -102,7 +102,7 @@ void WeightedAdaptiveMode::adaptiveThread() {
       // just make sure that its not something transient...!
       LINFO("Hmm... Is this the best we can do?");
       if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
-                                 _num_poll_outliers * 2)) {
+                                 _num_poll_outliers * 2) > (best_stall_rate * 1.001)) {
         LINFO("I guess so!");
         break;
       }
