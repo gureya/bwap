@@ -20,9 +20,9 @@
 namespace unstickymem {
 
 static bool initiatialized = false;
-static FILE *f = fopen("/home/dgureya/devs/unstickymem/unstickymem_log.txt",
+static FILE *f = fopen("/home/dgureya/bwap/unstickymem_log.txt",
                        "a");
-static FILE *f_1 = fopen("/home/dgureya/devs/unstickymem/elapsed_stall_rate_log.txt",
+static FILE *f_1 = fopen("/home/dgureya/bwap/elapsed_stall_rate_log.txt",
                         "a");
 
 //output stall rate to a log file

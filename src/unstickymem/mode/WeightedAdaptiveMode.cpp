@@ -122,7 +122,7 @@ void WeightedAdaptiveMode::start() {
    set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
    numa_get_mems_allowed()->size);*/
   //return;
-  // use weighted interleave as a default!
+  // use weighted interleave as a default if the memory allocations are small!
  /*MemoryMap &segments = MemoryMap::getInstance();
   for (auto &segment : segments) {
     if (segment.length() > (1UL << 14)) {
