@@ -32,9 +32,9 @@ double sum_nww = 0;
 // number of workers
 static bool OPT_NUM_WORKERS = false;
 static bool WEIGHTS = false;
-static bool MONITORING_CORE = false;
+bool MONITORING_CORE = false;
 int OPT_NUM_WORKERS_VALUE = 1;
-int MONITORING_CORE_VALUE;
+int MONITORING_CORE_VALUE = 0;
 
 namespace unstickymem {
 
@@ -58,9 +58,9 @@ void read_config(void) {
     exit (EXIT_FAILURE);
   }
 
-  MONITORING_CORE = std::getenv("MONITORING_CORE_VALUE") != nullptr;
+  MONITORING_CORE = std::getenv("BWAP_CORE") != nullptr;
   if (MONITORING_CORE){
-    MONITORING_CORE_VALUE = std::stoi(std::getenv("MONITORING_CORE_VALUE"));
+    MONITORING_CORE_VALUE = std::stoi(std::getenv("BWAP_CORE"));
   }
 }
 
@@ -78,12 +78,16 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
   // initialize pointers to wrapped functions
   unstickymem::init_real_functions();
 
+  // parse and display the configuration
+  read_config();
+  print_config();
+
   // initialize likwid
   initialize_likwid();
 
   // parse and display the configuration
-  read_config();
-  print_config();
+  // read_config();
+  // print_config();
 
   //set sum_ww & sum_nww & initialize the weights!
   get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);

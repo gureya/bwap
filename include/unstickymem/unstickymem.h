@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #ifdef __cplusplus
+extern bool MONITORING_CORE;
 extern "C" {
 #endif
 
@@ -12,7 +13,7 @@ extern int OPT_NUM_WORKERS_VALUE;
 // the monitoring core
 extern int MONITORING_CORE_VALUE;
 // check whether a monitoring core has been passed
-extern static bool MONITORING_CORE;
+//extern bool MONITORING_CORE;
 // Maximum number of nodes in the system
 #define MAX_NODES 2
 // A structure to hold the nodes information

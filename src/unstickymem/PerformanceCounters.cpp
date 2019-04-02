@@ -118,14 +118,17 @@ void initialize_likwid() {
     if (MONITORING_CORE) {
       for (int i = 0; i < active_cpus; i++) {
         cpus[i] = MONITORING_CORE_VALUE;
-        LINFOF(
+      }
+      LINFOF(
             "Monitoring core has been specified ! MONITORING_CORE_VALUE - %d",
             MONITORING_CORE_VALUE);
-      }
     } else {
       for (int i = 0; i < active_cpus; i++) {
         cpus[i] = topo->threadPool[i].apicId;
       }
+      LINFOF(
+            "Monitoring core has not been specified ! using default core - %d",
+            MONITORING_CORE_VALUE);
     }
 
     // Must be called before perfmon_init() but only if you want to use another
