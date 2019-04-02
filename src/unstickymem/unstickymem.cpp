@@ -32,7 +32,9 @@ double sum_nww = 0;
 // number of workers
 static bool OPT_NUM_WORKERS = false;
 static bool WEIGHTS = false;
+static bool MONITORING_CORE = false;
 int OPT_NUM_WORKERS_VALUE = 1;
+int MONITORING_CORE_VALUE;
 
 namespace unstickymem {
 
@@ -55,11 +57,18 @@ void read_config(void) {
     LDEBUG("Sorry, Weights have not been provided!");
     exit (EXIT_FAILURE);
   }
+
+  MONITORING_CORE = std::getenv("MONITORING_CORE_VALUE") != nullptr;
+  if (MONITORING_CORE){
+    MONITORING_CORE_VALUE = std::stoi(std::getenv("MONITORING_CORE_VALUE"));
+  }
 }
 
 void print_config(void) {
   LINFOF("num_workers: %s",
          OPT_NUM_WORKERS ? std::to_string(OPT_NUM_WORKERS_VALUE).c_str() : "no");
+  LINFOF("monitoring_core: %s",
+         MONITORING_CORE ? std::to_string(MONITORING_CORE_VALUE).c_str() : "no");
 }
 
 // library initialization
@@ -204,8 +213,6 @@ void get_sum_nww_ww(int num_workers) {
 
   if (num_workers == 1) {
     //workers: 0
-    //char weights[] = "/home/dgureya/devs/unstickymem/config/weights_1w.txt";
-    //read_weights(weights);
     //printf("Worker Nodes:\t");
     LDEBUG("Worker Nodes: 0");
     for (i = 0; i < MAX_NODES; i++) {
