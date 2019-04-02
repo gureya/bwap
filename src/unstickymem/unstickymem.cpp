@@ -59,7 +59,7 @@ void read_config(void) {
   }
 
   MONITORING_CORE = std::getenv("BWAP_CORE") != nullptr;
-  if (MONITORING_CORE){
+  if (MONITORING_CORE) {
     MONITORING_CORE_VALUE = std::stoi(std::getenv("BWAP_CORE"));
   }
 }
@@ -84,10 +84,6 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
 
   // initialize likwid
   initialize_likwid();
-
-  // parse and display the configuration
-  // read_config();
-  // print_config();
 
   //set sum_ww & sum_nww & initialize the weights!
   get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
@@ -196,12 +192,12 @@ void read_weights(char filename[]) {
     j++;
   }
 
-   int i;
-   printf("Initial Weights:\t");
-   for (i = 0; i < MAX_NODES; i++) {
-   printf("id: %d w: %.1f\t", nodes_info[i].id, nodes_info[i].weight);
-   }
-   printf("\n");
+  int i;
+  printf("Initial Weights:\t");
+  for (i = 0; i < MAX_NODES; i++) {
+    printf("id: %d w: %.1f\t", nodes_info[i].id, nodes_info[i].weight);
+  }
+  printf("\n");
 
   fclose(fp);
   if (line)

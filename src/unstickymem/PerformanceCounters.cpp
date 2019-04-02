@@ -119,16 +119,14 @@ void initialize_likwid() {
       for (int i = 0; i < active_cpus; i++) {
         cpus[i] = MONITORING_CORE_VALUE;
       }
-      LINFOF(
-            "Monitoring core has been specified ! MONITORING_CORE_VALUE - %d",
-            MONITORING_CORE_VALUE);
+      LINFOF("Monitoring core has been specified ! MONITORING_CORE_VALUE - %d",
+             MONITORING_CORE_VALUE);
     } else {
       for (int i = 0; i < active_cpus; i++) {
         cpus[i] = topo->threadPool[i].apicId;
       }
-      LINFOF(
-            "Monitoring core has not been specified ! using default core - %d",
-            MONITORING_CORE_VALUE);
+      LINFOF("Monitoring core has not been specified ! using default core - %d",
+             MONITORING_CORE_VALUE);
     }
 
     // Must be called before perfmon_init() but only if you want to use another
@@ -209,7 +207,7 @@ void initialize_likwid() {
 }
 
 double get_elapsed_stall_rate() {
-  int i, j;
+  //int i, j;
   double result = 0.0;
 
   //static double prev_cycles = 0;
@@ -231,7 +229,7 @@ double get_elapsed_stall_rate() {
   // For now just read/print for the active cores only, actually just one core at the moment!
   // double cycles = 0;
   double stalls = 0;
-  j = 0;
+  //j = 0;
   // char* ptr = NULL;
   //Results depending on the architecture!
   if (info->isIntel == 1) {
@@ -261,7 +259,7 @@ double get_elapsed_stall_rate() {
   //  j++;
   //}
   if (MONITORING_CORE) {
-    result = perfmon_getResult(gid, 0, MONITORING_CORE_VALUE);
+    result = perfmon_getResult(gid, 0, 0);
     stalls += result;
   } else {
     result = perfmon_getResult(gid, 0, 0);
@@ -297,7 +295,7 @@ double get_elapsed_stall_rate() {
 }
 
 double get_stall_rate_v2() {
-  int i, j;
+  //int i, j;
   double result = 0.0;
 
   //static double prev_cycles = 0;
@@ -319,7 +317,7 @@ double get_stall_rate_v2() {
   // For now just read/print for the active cores only, actually just one core at the moment!
   // double cycles = 0;
   double stalls = 0;
-  j = 0;
+  //j = 0;
   // char* ptr = NULL;
   //Results depending on the architecture!
   if (info->isIntel == 1) {
@@ -349,7 +347,7 @@ double get_stall_rate_v2() {
   //	j++;
   //}
   if (MONITORING_CORE) {
-    result = perfmon_getResult(gid, 0, MONITORING_CORE_VALUE);
+    result = perfmon_getResult(gid, 0, 0);
     stalls += result;
   } else {
     result = perfmon_getResult(gid, 0, 0);
