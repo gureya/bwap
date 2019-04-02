@@ -111,8 +111,8 @@ __attribute((destructor)) void libunstickymem_finalize(void) {
   // boost::interprocess::shared_memory_object::remove("unstickymem");
 
   //get the elapsed stall_rate
-  double stall_rate = get_elapsed_stall_rate();
-  unstickymem_log_v1(stall_rate, runtime->_mode_name);
+  //double stall_rate = get_elapsed_stall_rate();
+  //unstickymem_log_v1(stall_rate, runtime->_mode_name);
 
   // stop all the counters
   stop_all_counters();

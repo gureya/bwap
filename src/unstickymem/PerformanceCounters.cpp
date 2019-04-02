@@ -20,6 +20,7 @@
 namespace unstickymem {
 
 static bool initiatialized = false;
+//TODO: Remove this hard-coded file parts!
 static FILE *f = fopen("/home/dgureya/bwap/unstickymem_log.txt", "a");
 static FILE *f_1 = fopen("/home/dgureya/bwap/elapsed_stall_rate_log.txt", "a");
 
@@ -456,11 +457,12 @@ double get_average_stall_rate(size_t num_measurements,
   measurements.erase(measurements.begin(),
                      measurements.begin() + num_outliers_to_filter);
 
-  int i = 0;
-  for (auto m : measurements) {
-    unstickymem_log(i, m);
-    i++;
-  }
+  //for logging individual measurements!
+  /*int i = 0;
+   for (auto m : measurements) {
+   unstickymem_log(i, m);
+   i++;
+   }*/
 
   // return the average
   double sum = std::accumulate(measurements.begin(), measurements.end(), 0.0);
