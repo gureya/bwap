@@ -190,8 +190,8 @@ void place_pages_weighted_s(void *addr, unsigned long len, double s) {
           }
           break;
         case 2:
-          // workers: 0, 1
-          if (nodes_info[i].id == 0 || nodes_info[i].id == 1) {
+          // workers: 1
+          if (nodes_info[i].id == 1) {
             nodes_info_temp[i].id = nodes_info[i].id;
             nodes_info_temp[i].weight = round(
                 (nodes_info[i].weight / sum_ww * new_s) * 10) / 10;
@@ -205,40 +205,56 @@ void place_pages_weighted_s(void *addr, unsigned long len, double s) {
             sum += nodes_info_temp[i].weight;
           }
           break;
-        case 3:
-          // workers: 1,2,3
-          if (nodes_info[i].id == 1 || nodes_info[i].id == 2
-              || nodes_info[i].id == 3) {
-            nodes_info_temp[i].id = nodes_info[i].id;
-            nodes_info_temp[i].weight = round(
-                (nodes_info[i].weight / sum_ww * new_s) * 10) / 10;
-            //printf("%.2f\t", nodes_info_temp[i].weight);
-            sum += nodes_info_temp[i].weight;
-          } else {
-            nodes_info_temp[i].id = nodes_info[i].id;
-            nodes_info_temp[i].weight = round(
-                (nodes_info[i].weight / sum_nww * (100 - new_s)) * 10) / 10;
-            //printf("%.2f\t", nodes_info_temp[i].weight);
-            sum += nodes_info_temp[i].weight;
-          }
-          break;
-        case 4:
-          // workers: 0,1,2,3
-          if (nodes_info[i].id == 0 || nodes_info[i].id == 1
-              || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
-            nodes_info_temp[i].id = nodes_info[i].id;
-            nodes_info_temp[i].weight = round(
-                (nodes_info[i].weight / sum_ww * new_s) * 10) / 10;
-            //printf("%.2f\t", nodes_info_temp[i].weight);
-            sum += nodes_info_temp[i].weight;
-          } else {
-            nodes_info_temp[i].id = nodes_info[i].id;
-            nodes_info_temp[i].weight = round(
-                (nodes_info[i].weight / sum_nww * (100 - new_s)) * 10) / 10;
-            //printf("%.2f\t", nodes_info_temp[i].weight);
-            sum += nodes_info_temp[i].weight;
-          }
-          break;
+          /*case 2:
+           // workers: 0, 1
+           if (nodes_info[i].id == 0 || nodes_info[i].id == 1) {
+           nodes_info_temp[i].id = nodes_info[i].id;
+           nodes_info_temp[i].weight = round(
+           (nodes_info[i].weight / sum_ww * new_s) * 10) / 10;
+           //printf("%.2f\t", nodes_info_temp[i].weight);
+           sum += nodes_info_temp[i].weight;
+           } else {
+           nodes_info_temp[i].id = nodes_info[i].id;
+           nodes_info_temp[i].weight = round(
+           (nodes_info[i].weight / sum_nww * (100 - new_s)) * 10) / 10;
+           //printf("%.2f\t", nodes_info_temp[i].weight);
+           sum += nodes_info_temp[i].weight;
+           }
+           break;
+           case 3:
+           // workers: 1,2,3
+           if (nodes_info[i].id == 1 || nodes_info[i].id == 2
+           || nodes_info[i].id == 3) {
+           nodes_info_temp[i].id = nodes_info[i].id;
+           nodes_info_temp[i].weight = round(
+           (nodes_info[i].weight / sum_ww * new_s) * 10) / 10;
+           //printf("%.2f\t", nodes_info_temp[i].weight);
+           sum += nodes_info_temp[i].weight;
+           } else {
+           nodes_info_temp[i].id = nodes_info[i].id;
+           nodes_info_temp[i].weight = round(
+           (nodes_info[i].weight / sum_nww * (100 - new_s)) * 10) / 10;
+           //printf("%.2f\t", nodes_info_temp[i].weight);
+           sum += nodes_info_temp[i].weight;
+           }
+           break;
+           case 4:
+           // workers: 0,1,2,3
+           if (nodes_info[i].id == 0 || nodes_info[i].id == 1
+           || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
+           nodes_info_temp[i].id = nodes_info[i].id;
+           nodes_info_temp[i].weight = round(
+           (nodes_info[i].weight / sum_ww * new_s) * 10) / 10;
+           //printf("%.2f\t", nodes_info_temp[i].weight);
+           sum += nodes_info_temp[i].weight;
+           } else {
+           nodes_info_temp[i].id = nodes_info[i].id;
+           nodes_info_temp[i].weight = round(
+           (nodes_info[i].weight / sum_nww * (100 - new_s)) * 10) / 10;
+           //printf("%.2f\t", nodes_info_temp[i].weight);
+           sum += nodes_info_temp[i].weight;
+           }
+           break;*/
         default:
           LINFOF("Sorry, %d Worker nodes is not supported at the moment!\n",
                  OPT_NUM_WORKERS_VALUE)

@@ -148,6 +148,7 @@ void unstickymem_print_memory(void) {
   unstickymem::memory->print();
 }
 
+//TODO: Include the worker/non-worker flag as part of this!
 void read_weights(char filename[]) {
   FILE * fp;
   char * line = NULL;
@@ -224,65 +225,78 @@ void get_sum_nww_ww(int num_workers) {
       }
     }
   } else if (num_workers == 2) {
-    //workers: 0,1
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_2w.txt";
-    read_weights(weights);
+    //workers: 1
     //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 0,1");
+    LDEBUG("Worker Nodes: 1");
     for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 0 || nodes_info[i].id == 1) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+      if (nodes_info[i].id == 1) {
+        //printf("nodes_info[%d].id=%d", i, nodes_info[i].id);
         sum_ww += nodes_info[i].weight;
       } else {
         sum_nww += nodes_info[i].weight;
       }
     }
-  } else if (num_workers == 3) {
-    //workers: 1,2,3
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_3w.txt";
-    read_weights(weights);
-    //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 1,2,3");
-    for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 1 || nodes_info[i].id == 2
-          || nodes_info[i].id == 3) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
-        sum_ww += nodes_info[i].weight;
-      } else {
-        sum_nww += nodes_info[i].weight;
-      }
-    }
-  } else if (num_workers == 4) {
-    //workers: 0,1,2,3
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_4w.txt";
-    read_weights(weights);
-    //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 0,1,2,3");
-    for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 0 || nodes_info[i].id == 1
-          || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
-        sum_ww += nodes_info[i].weight;
-      } else {
-        sum_nww += nodes_info[i].weight;
-      }
-    }
-  } else if (num_workers == 8) {
-    //workers: all
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_8w.txt";
-    read_weights(weights);
-    //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 0,1,2,3");
-    for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 0 || nodes_info[i].id == 1
-          || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
-        sum_ww += nodes_info[i].weight;
-      } else {
-        sum_nww += nodes_info[i].weight;
-      }
-    }
-  } else {
+  }
+  /*else if (num_workers == 2) {
+   //workers: 0,1
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_2w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 0,1");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 0 || nodes_info[i].id == 1) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } else if (num_workers == 3) {
+   //workers: 1,2,3
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_3w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 1,2,3");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 1 || nodes_info[i].id == 2
+   || nodes_info[i].id == 3) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } else if (num_workers == 4) {
+   //workers: 0,1,2,3
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_4w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 0,1,2,3");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 0 || nodes_info[i].id == 1
+   || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } else if (num_workers == 8) {
+   //workers: all
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_8w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 0,1,2,3");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 0 || nodes_info[i].id == 1
+   || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } */else {
     LDEBUGF("Sorry, %d workers is not supported at the moment!", num_workers);
     exit (EXIT_FAILURE);
   }
