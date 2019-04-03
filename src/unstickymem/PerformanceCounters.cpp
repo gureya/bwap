@@ -69,12 +69,13 @@ static int active_cpus;
 
 //list of all the events for the different architectures supported
 //char amd_estr[] = "CPU_CLOCKS_UNHALTED:PMC0,DISPATCH_STALLS:PMC1"; //AMD
-char amd_estr[] = "DISPATCH_STALLS:PMC0";  //AMD DISPATCH_STALL_LDQ_FULL,DISPATCH_STALL_FP_SCHED_Q_FULL
+//char amd_estr[] = "DISPATCH_STALLS:PMC0";  //AMD DISPATCH_STALL_LDQ_FULL,DISPATCH_STALL_FP_SCHED_Q_FULL
+char* amd_estr = "DISPATCH_STALLS:PMC0";
 //char amd_estr[] = "DISPATCH_STALL_INSTRUCTION_RETIRED_Q_FULL:PMC0";
 //char intel_estr[] =
 //		"CPU_CLOCK_UNHALTED_THREAD_P:PMC0,RESOURCE_STALLS_ANY:PMC1"; //Intel Broadwell EP
-char intel_estr[] = "RESOURCE_STALLS_ANY:PMC0";  //Intel Broadwell EP, Intel Core Westmere processor
-
+//char intel_estr[] = "RESOURCE_STALLS_ANY:PMC0";  //Intel Broadwell EP, Intel Core Westmere processor
+char* intel_estr = "RESOURCE_STALLS_ANY:PMC0";
 //if a specific pmc has been specified override the above variables!
 void check_pmc() {
   if (PMC_VALUE == 1) {
