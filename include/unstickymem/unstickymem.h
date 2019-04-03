@@ -8,7 +8,8 @@
 extern bool MONITORING_CORE;
 extern "C" {
 #endif
-
+// the PMC to use
+extern int PMC_VALUE;
 // the number of worker nodes
 extern int OPT_NUM_WORKERS_VALUE;
 // the monitoring core

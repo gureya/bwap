@@ -33,8 +33,10 @@ double sum_nww = 0;
 static bool OPT_NUM_WORKERS = false;
 static bool WEIGHTS = false;
 bool MONITORING_CORE = false;
+static bool PMC = false;
 int OPT_NUM_WORKERS_VALUE = 1;
 int MONITORING_CORE_VALUE = 0;
+int PMC_VALUE = 0;
 
 namespace unstickymem {
 
@@ -61,6 +63,11 @@ void read_config(void) {
   MONITORING_CORE = std::getenv("BWAP_CORE") != nullptr;
   if (MONITORING_CORE) {
     MONITORING_CORE_VALUE = std::stoi(std::getenv("BWAP_CORE"));
+  }
+
+  PMC = std::getenv("BWAP_PMC") != nullptr;
+  if (PMC) {
+    PMC_VALUE = std::stoi(std::getenv("BWAP_PMC"));
   }
 }
 

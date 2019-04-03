@@ -75,6 +75,12 @@ char amd_estr[] = "DISPATCH_STALLS:PMC0";  //AMD DISPATCH_STALL_LDQ_FULL,DISPATC
 //		"CPU_CLOCK_UNHALTED_THREAD_P:PMC0,RESOURCE_STALLS_ANY:PMC1"; //Intel Broadwell EP
 char intel_estr[] = "RESOURCE_STALLS_ANY:PMC0";  //Intel Broadwell EP, Intel Core Westmere processor
 
+//if a specific pmc has been specified override the above variables!
+if(PMC_VALUE == 1) {
+  amd_estr = "DISPATCH_STALLS:PMC1";
+  intel_estr = "RESOURCE_STALLS_ANY:PMC1";
+}
+
 void initialize_likwid() {
   if (!initiatialized) {
     //perfmon_setVerbosity(3);
