@@ -30,6 +30,9 @@ void place_pages_weighted_initial(void *addr, unsigned long len);
 void place_all_pages(MemoryMap &segments, double ratio);
 void place_all_pages(double ratio);
 
+void place_pages_weighted_partial(const MemorySegment &segment);
+void place_pages_weighted_partial(void *addr, unsigned long len);
+
 void place_pages_weighted_s(void *addr, unsigned long len, double s);
 void place_pages_weighted(void *addr, unsigned long len);
 void place_all_pages_adaptive(double ratio);
