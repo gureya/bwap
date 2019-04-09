@@ -416,8 +416,8 @@ void place_pages_weighted_partial(void *addr, unsigned long len) {
 
   // nodes that can still receive pages
   struct bitmask *node_set_initial = numa_bitmask_alloc(MAX_NODES);  // numa_allocate_nodemask();
-  numa_bitmask_setbit(node_set, 0);
-  numa_bitmask_setbit(node_set, 2);
+  numa_bitmask_setbit(node_set_initial, 0);
+  numa_bitmask_setbit(node_set_initial, 2);
 
   float w = 0;  // weight that has already been allocated among the nodes that can still receive pages
   int a = MAX_NODES;  // number of nodes which can still receive pages
