@@ -397,18 +397,15 @@ void place_pages_weighted_initial(const MemorySegment &segment) {
   }
 }
 
-void place_pages_weighted_partial(const MemorySegment &segment) {
+void place_pages_weighted_contiguous(const MemorySegment &segment) {
   if (segment.length() > 1ULL << 20) {
-    // LINFOF("segment %s [%p:%p]", segment.name().c_str(), segment.startAddress(),
-    //      segment.endAddress());
-    //segment.print();
-    place_pages_weighted_partial(segment.pageAlignedStartAddress(),
-                                 segment.pageAlignedLength());
+    place_pages_weighted_contiguous(segment.pageAlignedStartAddress(),
+                                    segment.pageAlignedLength());
   }
 }
 
-//interleave pages on a partial node -- nodes are hard-coded for now!
-void place_pages_weighted_partial(void *addr, unsigned long len) {
+//weighted interleave with a contiguous memory mapping!
+void place_pages_weighted_contiguous(void *addr, unsigned long len) {
   size_t size = len;
   void *start = addr;
   int i;
@@ -416,11 +413,6 @@ void place_pages_weighted_partial(void *addr, unsigned long len) {
 
   // nodes that can still receive pages
   struct bitmask *node_set_initial = numa_bitmask_alloc(MAX_NODES);  // numa_allocate_nodemask();
-  numa_bitmask_setbit(node_set_initial, 0);
-  numa_bitmask_setbit(node_set_initial, 2);
-
-  float w = 0;  // weight that has already been allocated among the nodes that can still receive pages
-  int a = MAX_NODES;  // number of nodes which can still receive pages
 
   size_t total_size = 0;  // total size interleaved so far
   size_t my_size = 0;
@@ -432,9 +424,9 @@ void place_pages_weighted_partial(void *addr, unsigned long len) {
       break;
     }
 
-    // b = size that remains to allocate in the next node with smallest beta
-    float b = nodes_info[i].weight - w;
-    my_size = a * (b / 100) * size;
+    numa_bitmask_setbit(node_set_initial, nodes_info[i].id);
+
+    my_size = (nodes_info[i].weight / 100) * size;
 
     // round up to multiple of the page size
     my_size = PAGE_ALIGN_UP(my_size);
@@ -445,17 +437,15 @@ void place_pages_weighted_partial(void *addr, unsigned long len) {
     }
     total_size += my_size;
 
-    // only interleave if memory is in the region
+    // only mbind if memory is in the region
     if (my_size != 0) {
       DIEIF(
-          WRAP(mbind)(start, my_size, MPOL_INTERLEAVE, node_set_initial->maskp, node_set_initial->size + 1, MPOL_MF_MOVE | MPOL_MF_STRICT) != 0,
+          WRAP(mbind)(start, my_size, MPOL_BIND, node_set_initial->maskp, node_set_initial->size + 1, MPOL_MF_MOVE | MPOL_MF_STRICT) != 0,
           "mbind interleave failed");
-    }
 
-    start =
-        reinterpret_cast<void*>(reinterpret_cast<intptr_t>(start) + my_size);  // increment base to a new location
-    a--;  // one less node where to allocate pages
-    w = nodes_info[i].weight;  // we update the size already allocated in the remaining nodes
+      start = reinterpret_cast<void*>(reinterpret_cast<intptr_t>(start)
+          + my_size);  // increment base to a new location
+    }
     if (numa_bitmask_isbitset(node_set_initial, nodes_info[i].id)) {
       numa_bitmask_clearbit(node_set_initial, nodes_info[i].id);  // remove node i from the set of remaining nodes
     }
@@ -463,7 +453,6 @@ void place_pages_weighted_partial(void *addr, unsigned long len) {
 
   numa_bitmask_free(node_set_initial);
 }
-//end partial page placement function!
 
 // interleave pages using the weights - use the initial weights!
 void place_pages_weighted_initial(void *addr, unsigned long len) {

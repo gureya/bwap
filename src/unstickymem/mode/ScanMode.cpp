@@ -58,8 +58,7 @@ void ScanMode::processSegmentAddition(const MemorySegment& segment) {
 
   if (segment.length() > (1UL << 14)) {
     //segment.print();
-    //place_pages_weighted_initial(segment);
-    place_pages_weighted_partial(segment);
+    place_pages_weighted_initial(segment);
   }
 
 }
