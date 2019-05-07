@@ -183,7 +183,7 @@ void place_pages_weighted_dwp(void *addr, unsigned long len, double s) {
             sum += nodes_info_temp[i].weight;
           } else {
             nodes_info_temp[i].id = nodes_info[i].id;
-            nnodes_info_temp[i].weight = round(100 - new_s);
+            nodes_info_temp[i].weight = round(100 - new_s);
             //printf("%.2f\t", nodes_info_temp[i].weight);
             sum += nodes_info_temp[i].weight;
           }
