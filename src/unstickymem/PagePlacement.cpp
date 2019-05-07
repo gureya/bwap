@@ -159,6 +159,81 @@ void place_pages_weighted(void *addr, unsigned long len) {
   numa_bitmask_free(node_set);
 }
 
+//From local to remote weighted page placement respecting dwp
+void place_pages_weighted_dwp(void *addr, unsigned long len, double s) {
+  int i = 0;
+
+  if (weight_initialized == 0) {
+    double new_s = 0;
+
+    new_s = sum_ww - s;
+    // Calculate new weights
+    // printf("NODE Weights: \t");
+    double sum = 0;
+
+    for (i = 0; i < MAX_NODES; i++) {
+      switch (OPT_NUM_WORKERS_VALUE) {
+        case 1:
+          // workers: 0
+          if (nodes_info[i].id == 0) {
+            nodes_info_temp[i].id = nodes_info[i].id;
+            nodes_info_temp[i].weight = round(
+                nodes_info[i].weight / sum_ww * new_s);
+            //printf("%.2f\t", nodes_info_temp[i].weight);
+            sum += nodes_info_temp[i].weight;
+          } else {
+            nodes_info_temp[i].id = nodes_info[i].id;
+            nnodes_info_temp[i].weight = round(100 - new_s);
+            //printf("%.2f\t", nodes_info_temp[i].weight);
+            sum += nodes_info_temp[i].weight;
+          }
+          break;
+        case 2:
+          // workers: 1
+          if (nodes_info[i].id == 1) {
+            nodes_info_temp[i].id = nodes_info[i].id;
+            nodes_info_temp[i].weight = round(
+                nodes_info[i].weight / sum_ww * new_s);
+            //printf("%.2f\t", nodes_info_temp[i].weight);
+            sum += nodes_info_temp[i].weight;
+          } else {
+            nodes_info_temp[i].id = nodes_info[i].id;
+            nodes_info_temp[i].weight = round(100 - new_s);
+            //printf("%.2f\t", nodes_info_temp[i].weight);
+            sum += nodes_info_temp[i].weight;
+          }
+          break;
+        default:
+          LINFOF("Sorry, %d Worker nodes is not supported at the moment!\n",
+                 OPT_NUM_WORKERS_VALUE)
+          ;
+          exit(-1);
+      }
+    }
+
+    /* printf("%.2f\n", sum);
+
+     printf("NODE IDs: \t");
+     for (i = 0; i < MAX_NODES; i++) {
+     printf("%d\t", nodes_info_temp[i].id);
+     }
+     printf("\n");*/
+
+    if ((check_sum(nodes_info_temp)) != 100) {
+      printf("**Sum of New weights must be equal to 100, sum=%d!**\n",
+             check_sum(nodes_info_temp));
+      exit(-1);
+    }
+
+    /* printf(
+     "===========================================================================\n");*/
+    weight_initialized = 1;
+  }
+
+  // Enforce the new weights!
+  place_pages_weighted(addr, len);
+}
+
 // weighted placement with interleaving respecting s
 void place_pages_weighted_s(void *addr, unsigned long len, double s) {
   int i = 0;
@@ -370,7 +445,9 @@ void place_pages(void *addr, unsigned long len, double r) {
 void place_pages(MemorySegment &segment, double ratio) {
   // LDEBUGF("segment %s [%p:%p] ratio: %lf", segment.name().c_str(), segment.startAddress(), segment.endAddress(), ratio);
   // segment.print();
-  place_pages_weighted_s(segment.pageAlignedStartAddress(),
+  //place_pages_weighted_s(segment.pageAlignedStartAddress(),
+  //                     segment.pageAlignedLength(), ratio);
+  place_pages_weighted_dwp(segment.pageAlignedStartAddress(),
                          segment.pageAlignedLength(), ratio);
 }
 
