@@ -53,66 +53,68 @@ void WeightedAdaptiveMode::processSegmentAddition(
   // }
   if (segment.length() > (1UL << 14)) {
     // segment.print();
-    place_pages_weighted_initial(segment);
+    //place_pages_weighted_initial(segment);
   }
   //*/
 }
 
 void WeightedAdaptiveMode::adaptiveThread() {
-  double prev_stall_rate = std::numeric_limits<double>::infinity();
-  double best_stall_rate = std::numeric_limits<double>::infinity();
-  double stall_rate;
+  /*double prev_stall_rate = std::numeric_limits<double>::infinity();
+   double best_stall_rate = std::numeric_limits<double>::infinity();
+   double stall_rate;*/
 
-  get_stall_rate_v2();
+  //get_stall_rate_v2();
   //get_elapsed_stall_rate();
-  sleep(_wait_start);
-
+  //sleep(_wait_start);
   // dump mapping information
   MemoryMap &segments = MemoryMap::getInstance();
   //segments.print();
-
-  // slowly achieve awesomeness - asymmetric weights version!
-  double i;
-  bool terminate = false;
-  for (i = 0; !terminate; i += ADAPTATION_STEP) {
-    if (i > sum_nww) {
-      i = sum_nww;
-      terminate = true;
-    }
+  for (double i = 10; i <= 100; i += ADAPTATION_STEP) {
     LINFOF("Going to check a ratio of %lf", i);
-    //First check the stall rate of the initial weights without moving pages!
-    if (i != 0) {
-      place_all_pages(segments, i);
-    }
-    usleep(200000);
-    //sleep(1);
-    //unstickymem_log(i);
-    stall_rate = get_average_stall_rate(_num_polls, _poll_sleep,
-                                        _num_poll_outliers);
-    //print stall_rate to a file for debugging!
-    //unstickymem_log(i, stall_rate);
-    LINFOF("Ratio: %lf StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
-           stall_rate, prev_stall_rate, best_stall_rate);
-
-    // compute the minimum rate
-    best_stall_rate = std::min(best_stall_rate, stall_rate);
-    // check if we are geting worse
-    if (stall_rate > best_stall_rate * 1.001) {
-      // just make sure that its not something transient...!
-      LINFO("Hmm... Is this the best we can do?");
-      if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
-                                 _num_poll_outliers * 2)
-          > (best_stall_rate * 1.001)) {
-        LINFO("I guess so!");
-        break;
-      }
-    }
-    prev_stall_rate = stall_rate;
+    place_all_pages(segments, i);
   }
-  LINFO("My work here is done! Enjoy the speedup");
-  LINFOF("Ratio: %lf", i);
-  LINFOF("Stall Rate: %1.10lf", stall_rate);
-  LINFOF("Best Measured Stall Rate: %1.10lf", best_stall_rate);
+  // slowly achieve awesomeness - asymmetric weights version!
+  /*double i;
+   bool terminate = false;
+   for (i = 0; !terminate; i += ADAPTATION_STEP) {
+   if (i > sum_nww) {
+   i = sum_nww;
+   terminate = true;
+   }
+   LINFOF("Going to check a ratio of %lf", i);
+   //First check the stall rate of the initial weights without moving pages!
+   if (i != 0) {
+   place_all_pages(segments, i);
+   }
+   usleep(200000);
+   //sleep(1);
+   //unstickymem_log(i);
+   stall_rate = get_average_stall_rate(_num_polls, _poll_sleep,
+   _num_poll_outliers);
+   //print stall_rate to a file for debugging!
+   //unstickymem_log(i, stall_rate);
+   LINFOF("Ratio: %lf StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
+   stall_rate, prev_stall_rate, best_stall_rate);
+
+   // compute the minimum rate
+   best_stall_rate = std::min(best_stall_rate, stall_rate);
+   // check if we are geting worse
+   if (stall_rate > best_stall_rate * 1.001) {
+   // just make sure that its not something transient...!
+   LINFO("Hmm... Is this the best we can do?");
+   if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
+   _num_poll_outliers * 2)
+   > (best_stall_rate * 1.001)) {
+   LINFO("I guess so!");
+   break;
+   }
+   }
+   prev_stall_rate = stall_rate;
+   }
+   LINFO("My work here is done! Enjoy the speedup");
+   LINFOF("Ratio: %lf", i);
+   LINFOF("Stall Rate: %1.10lf", stall_rate);
+   LINFOF("Best Measured Stall Rate: %1.10lf", best_stall_rate);*/
 }
 
 void WeightedAdaptiveMode::start() {

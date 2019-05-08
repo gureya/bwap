@@ -34,6 +34,7 @@ void place_pages_weighted_contiguous(const MemorySegment &segment);
 void place_pages_weighted_contiguous(void *addr, unsigned long len);
 
 void place_pages_weighted_dwp(void *addr, unsigned long len, double s);
+void move_pages_remote(void *addr, unsigned long len);
 
 void place_pages_weighted_s(void *addr, unsigned long len, double s);
 void place_pages_weighted(void *addr, unsigned long len);

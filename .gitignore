@@ -181,3 +181,6 @@ cmake_uninstall.cmake
 
 # .txt files
 *.txt
+
+# ignore weights folder
+weights/
