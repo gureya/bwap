@@ -140,12 +140,16 @@ void move_pages_remote(void *addr, unsigned long len) {
       /* long move_pages(int pid, unsigned long count, void **pages,
        const int *nodes, int *status, int flags);*/
       ret = move_pages(0, 1, &start, &remote_node, &status, MPOL_MF_MOVE);
-      if (ret == -1) {
+      if (ret != 0) {
         LINFOF("Error moving this page: %d - %s", errno, strerror(errno));
         LINFO("Going to die!!");
         exit(-1);
       }
-      LINFOF("Page Status: %d", status);
+      if (status != 1) {
+        LINFOF("Error in page status: %d - %s", errno, strerror(errno));
+        LINFO("Going to die!!");
+        exit(-1);
+      }
       start = reinterpret_cast<void*>(reinterpret_cast<intptr_t>(start)
           + pagesize);
       count++;
