@@ -69,10 +69,11 @@ void WeightedAdaptiveMode::adaptiveThread() {
   // dump mapping information
   MemoryMap &segments = MemoryMap::getInstance();
   //segments.print();
-  for (double i = 10; i <= 100; i += ADAPTATION_STEP) {
-    LINFOF("Going to check a ratio of %lf", i);
-    place_all_pages(segments, i);
-  }
+  double i = 10;
+  //for (double i = 10; i <= 100; i += ADAPTATION_STEP) {
+  LINFOF("Going to check a ratio of %lf", i);
+  place_all_pages(segments, i);
+  //}
   // slowly achieve awesomeness - asymmetric weights version!
   /*double i;
    bool terminate = false;

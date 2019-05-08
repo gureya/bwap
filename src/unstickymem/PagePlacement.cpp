@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <errno.h>
 
 #include <numeric>
 #include <iostream>
@@ -102,11 +103,13 @@ void move_pages_remote(void *addr, unsigned long len) {
   pagesize = numa_pagesize();
   size_t size = len;
   void *start = addr;
-  //int ret;
+  int ret;
   int status;
 
   int page_count = size / pagesize;
+  LINFOF("Page size (bytes): %d", pagesize);
   LINFOF("Number of pages in this segment: %d", page_count);
+  LINFOF("Total size (MB): %d", size / 1000000);
 
   //for now assume the remote node as node 1
   double remote_weight;
@@ -126,6 +129,8 @@ void move_pages_remote(void *addr, unsigned long len) {
   double moved_pages = remote_weight / 100 * (double) page_count;
   LINFOF("Remote node: id=%d, weight=%.2lf", remote_node, remote_weight);
   LINFOF("Number of pages to be moved: %.2lf", moved_pages);
+  LINFOF("Size of pages to be moved (MB): %.2lf",
+         moved_pages * pagesize / 1000000);
 
   for (int i = 0; i < page_count; ++i) {
     int check_page = distr(generator);
@@ -134,7 +139,13 @@ void move_pages_remote(void *addr, unsigned long len) {
     if (check_page < moved_pages) {
       /* long move_pages(int pid, unsigned long count, void **pages,
        const int *nodes, int *status, int flags);*/
-      move_pages(0, 1, &start, &remote_node, &status, MPOL_MF_MOVE);
+      ret = move_pages(0, 1, &start, &remote_node, &status, MPOL_MF_MOVE);
+      if (ret == -1) {
+        LINFOF("Error moving this page: %d - %s", errno, strerror(errno));
+        LINFO("Going to die!!");
+        exit(-1);
+      }
+      LINFOF("Page Status: %d", status);
       start = reinterpret_cast<void*>(reinterpret_cast<intptr_t>(start)
           + pagesize);
       count++;
@@ -145,6 +156,7 @@ void move_pages_remote(void *addr, unsigned long len) {
   }
 
   LINFOF("Actual pages moved: %d", count);
+  LINFOF("Actual size (MB): %d", count * pagesize / 1000000);
 
 }
 
