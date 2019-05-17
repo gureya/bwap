@@ -90,7 +90,7 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
   print_config();
 
   // initialize likwid
-  //initialize_likwid();
+  initialize_likwid();
 
   //set sum_ww & sum_nww & initialize the weights!
   get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
@@ -122,7 +122,7 @@ __attribute((destructor)) void libunstickymem_finalize(void) {
   //unstickymem_log_v1(stall_rate, runtime->_mode_name);
 
   // stop all the counters
-  //stop_all_counters();
+  stop_all_counters();
   LINFO("Finalized");
 }
 
