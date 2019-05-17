@@ -13,9 +13,9 @@ int main() {
   int *x = malloc(SIZE);
   printf("acessing unallocated value: %d\n", x[0]);
   printf("x_base: %p, size(mb): %d\n", x, SIZE / 1000);
- // unstickymem_start();
+  // unstickymem_start();
   x[0] = 123;
-  for(size_t i=1; i < NUM_ELEMS; i++) {
+  for (size_t i = 1; i < NUM_ELEMS; i++) {
     x[i] = x[0] * x[0] % 1000000;
   }
 

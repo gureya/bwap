@@ -14,7 +14,6 @@
 #include "unstickymem/PagePlacement.hpp"
 #include "unstickymem/wrap.hpp"
 
-
 static int pagesize;
 
 RECORD nodes_info_temp[MAX_NODES];
@@ -102,60 +101,60 @@ void force_uniform_interleave(MemorySegment &segment) {
 
 //fault pages so that the move system call can take into effect!
 /*void fault_pages(void *start, unsigned long len){
-  
-  pagesize = numa_pagesize();
 
-  char *pages;
+ pagesize = numa_pagesize();
 
-  int i, rc;
+ char *pages;
 
-  void **addr;
-  int *status;
-  int *nodes;
+ int i, rc;
 
-  int page_count = len / pagesize;
+ void **addr;
+ int *status;
+ int *nodes;
 
-  //page_count = page_count;
+ int page_count = len / pagesize;
 
-  //LINFOF("page_base=%p, page_count=%d", start, page_count);
-  addr = (void **) malloc(sizeof(char *) * page_count);
-  status = (int *) malloc(page_count * sizeof(int *));
-  nodes = (int *) malloc(page_count * sizeof(int *));
+ //page_count = page_count;
 
-  if(!start || !addr || !status || !nodes){
-          LINFO("Unable to allocate memory");
-          exit(1);
-  }
+ //LINFOF("page_base=%p, page_count=%d", start, page_count);
+ addr = (void **) malloc(sizeof(char *) * page_count);
+ status = (int *) malloc(page_count * sizeof(int *));
+ nodes = (int *) malloc(page_count * sizeof(int *));
 
-  //pages = (char*) ((void *) ((((long)start) & ~((long)(pagesize - 1))) + pagesize));
-  pages = (char *) start;
-  //LINFOF("page_base: %p, size(mb): %d pages: %p, pagesize: %d\n", start, len / 1000, pages, pagesize);
+ if(!start || !addr || !status || !nodes){
+ LINFO("Unable to allocate memory");
+ exit(1);
+ }
 
-  for (i = 0; i < page_count; i++) {
-          addr[i] = pages + i * pagesize;
-          nodes[i] = 1;
-          status[i] = -123;
-  }
+ //pages = (char*) ((void *) ((((long)start) & ~((long)(pagesize - 1))) + pagesize));
+ pages = (char *) start;
+ //LINFOF("page_base: %p, size(mb): %d pages: %p, pagesize: %d\n", start, len / 1000, pages, pagesize);
 
-  LINFO("Making sure pages are faulted before allocation");
-  rc = numa_move_pages(0, page_count, addr, NULL, status, 0);
-  int *fake;
-  for( i = 0; i < page_count; i++){
-          //LINFOF("Page %d vaddr=%p status=%d", i, page_base + i * pagesize, status[i]);
-          if (status[i] < 0) {
-                  fake = (int *) (pages + i * pagesize);
-                  *fake = 123;
-                  //exit(1);
-          }
-  }
+ for (i = 0; i < page_count; i++) {
+ addr[i] = pages + i * pagesize;
+ nodes[i] = 1;
+ status[i] = -123;
+ }
 
-  LINFO("All pages have been faulted!");
-}*/
+ LINFO("Making sure pages are faulted before allocation");
+ rc = numa_move_pages(0, page_count, addr, NULL, status, 0);
+ int *fake;
+ for( i = 0; i < page_count; i++){
+ //LINFOF("Page %d vaddr=%p status=%d", i, page_base + i * pagesize, status[i]);
+ if (status[i] < 0) {
+ fake = (int *) (pages + i * pagesize);
+ *fake = 123;
+ //exit(1);
+ }
+ }
+
+ LINFO("All pages have been faulted!");
+ }*/
 
 //place pages with the move_pages system call
 //courtesy: https://stackoverflow.com/questions/10989169/numa-memory-page-migration-overhead/11148999
 void move_pages_remote(void *start, unsigned long len, double remote_ratio) {
-	
+
   pagesize = numa_pagesize();
 
   char *pages;
@@ -175,154 +174,147 @@ void move_pages_remote(void *start, unsigned long len, double remote_ratio) {
   status = (int *) malloc(page_count * sizeof(int *));
   nodes = (int *) malloc(page_count * sizeof(int *));
 
-  if(!start || !addr || !status || !nodes){
-	  LINFO("Unable to allocate memory");
-	  exit(1);
+  if (!start || !addr || !status || !nodes) {
+    LINFO("Unable to allocate memory");
+    exit(1);
   }
 
   pages = (char *) start;
 
   //set the remote and local nodes here
-  if(OPT_NUM_WORKERS_VALUE == 2){
-	  remote_node = 0;
-	  local_node = 1;
-  }
-  else{
-	  remote_node = 1;
-	  local_node = 0;
+  if (OPT_NUM_WORKERS_VALUE == 2) {
+    remote_node = 0;
+    local_node = 1;
+  } else {
+    remote_node = 1;
+    local_node = 0;
   }
 
   //uniform distribution memory allocation (using the bwap style format)
-  if (remote_ratio <= 50){
-          interleaved_pages = (remote_ratio / 100 * (double) page_count) * MAX_NODES;
-	  //LINFOF("page_count:%d interleaved_pages:%d", page_count, (int) interleaved_pages);
-	  for (i = 0; i < interleaved_pages; ++i){
-		  addr[i] = pages + i * pagesize;
-		  if (i % 2 == 0){
-			  nodes[i] = local_node;
-		  }
-		  else{
-			  nodes[i] = remote_node;
-		  }
-		  status[i] = -123;
-	  }
+  if (remote_ratio <= 50) {
+    interleaved_pages = (remote_ratio / 100 * (double) page_count) * MAX_NODES;
+    //LINFOF("page_count:%d interleaved_pages:%d", page_count, (int) interleaved_pages);
+    for (i = 0; i < interleaved_pages; ++i) {
+      addr[i] = pages + i * pagesize;
+      if (i % 2 == 0) {
+        nodes[i] = local_node;
+      } else {
+        nodes[i] = remote_node;
+      }
+      status[i] = -123;
+    }
 
-	  rc = move_pages(0, interleaved_pages, addr, nodes, status, MPOL_MF_MOVE);
-	  if (rc < 0 && errno != ENOENT) {
-		  perror("move_pages");
-		  exit(1);
-	  }
+    rc = move_pages(0, interleaved_pages, addr, nodes, status, MPOL_MF_MOVE);
+    if (rc < 0 && errno != ENOENT) {
+      perror("move_pages");
+      exit(1);
+    }
 
-  }
-  else{
-          interleaved_pages = ((100 - remote_ratio) / 100 * (double) page_count) * MAX_NODES;
-	  //LINFOF("page_count:%d interleaved_pages:%d", page_count, (int) interleaved_pages);
-	  for (i = 0; i < page_count; ++i){
-		  addr[i] = pages + i * pagesize;
-		  if(i < interleaved_pages){
-			  if (i % 2 == 0){
-				  nodes[i] = local_node;
-			  }
-			  else{
-				  nodes[i] = remote_node;
-			  }
-		  }
-		  else{
-			  nodes[i] = remote_node;
-		  }
-		  status[i] = -123;
-	  }
+  } else {
+    interleaved_pages = ((100 - remote_ratio) / 100 * (double) page_count)
+        * MAX_NODES;
+    //LINFOF("page_count:%d interleaved_pages:%d", page_count, (int) interleaved_pages);
+    for (i = 0; i < page_count; ++i) {
+      addr[i] = pages + i * pagesize;
+      if (i < interleaved_pages) {
+        if (i % 2 == 0) {
+          nodes[i] = local_node;
+        } else {
+          nodes[i] = remote_node;
+        }
+      } else {
+        nodes[i] = remote_node;
+      }
+      status[i] = -123;
+    }
 
-	  rc = move_pages(0, page_count, addr, nodes, status, MPOL_MF_MOVE);
-          if (rc < 0 && errno != ENOENT) {
-                  perror("move_pages");
-                  exit(1);
-          }
+    rc = move_pages(0, page_count, addr, nodes, status, MPOL_MF_MOVE);
+    if (rc < 0 && errno != ENOENT) {
+      perror("move_pages");
+      exit(1);
+    }
   }
 
   //Move pages
   //LINFOF("move_pages....(%d pages)", page_count);
   //pid_t pid = getpid(); //pid of the current process!
   /*rc = move_pages(0, page_count, addr, nodes, status, MPOL_MF_MOVE);
-  if (rc < 0 && errno != ENOENT) {
-          perror("move_pages");
-          exit(1);
-  }*/
-
+   if (rc < 0 && errno != ENOENT) {
+   perror("move_pages");
+   exit(1);
+   }*/
 
   //return if the segment is not initialized!
   //check this by moving 1 page and checking the status of the page
-
   /*addr[0] = pages;
-  nodes[0] = local_node;
-  status[0] = -123;
-  rc = numa_move_pages(0, 1, addr, NULL, status, 0);
-  //LINFOF("rc=%d vaddr=%p node=%d status=%d", rc, addr[0], nodes[0], status[0]);
-  if (rc < 0 && errno != ENOENT) {
-          perror("move_pages");
-          exit(1);
-  }
+   nodes[0] = local_node;
+   status[0] = -123;
+   rc = numa_move_pages(0, 1, addr, NULL, status, 0);
+   //LINFOF("rc=%d vaddr=%p node=%d status=%d", rc, addr[0], nodes[0], status[0]);
+   if (rc < 0 && errno != ENOENT) {
+   perror("move_pages");
+   exit(1);
+   }
 
-  //LINFOF("Segment status=%d", status[0]);
-  if (status[0] == remote_node){
-	  LINFOF("Returning, segment seems to have been moved before, status=%d", status[0]);
-	  return;
-  }*/
-  
+   //LINFOF("Segment status=%d", status[0]);
+   if (status[0] == remote_node){
+   LINFOF("Returning, segment seems to have been moved before, status=%d", status[0]);
+   return;
+   }*/
+
   //contiguous memory allocation
   /*struct timeval tval_before, tval_after, tval_result;
-  gettimeofday(&tval_before, NULL);
-  for (i = 0; i < page_count; ++i) {
-	  addr[i] = pages + i * pagesize;
-	  if (i < moved_pages){
-		  nodes[i] = remote_node;
-	  }
-	  else{
-		  nodes[i] = local_node;
-	  }
-	  status[i] = -123;
-  }
-  gettimeofday(&tval_after, NULL);
-  timersub(&tval_after, &tval_before, &tval_result);
-  LINFOF("Elapsed time (seconds) to process the nodes of this segment(pages=%d): %ld.%06ld", page_count, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
-*/
+   gettimeofday(&tval_before, NULL);
+   for (i = 0; i < page_count; ++i) {
+   addr[i] = pages + i * pagesize;
+   if (i < moved_pages){
+   nodes[i] = remote_node;
+   }
+   else{
+   nodes[i] = local_node;
+   }
+   status[i] = -123;
+   }
+   gettimeofday(&tval_after, NULL);
+   timersub(&tval_after, &tval_before, &tval_result);
+   LINFOF("Elapsed time (seconds) to process the nodes of this segment(pages=%d): %ld.%06ld", page_count, (long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
+   */
   //uniform distribution memory allocation (using a uniform random generator!)
   /*const int range_from = 0;
-  const int range_to = page_count;
-  std::random_device rand_dev;
-  std::mt19937 generator(rand_dev());
-  std::uniform_int_distribution<int> distr(range_from, range_to);
+   const int range_to = page_count;
+   std::random_device rand_dev;
+   std::mt19937 generator(rand_dev());
+   std::uniform_int_distribution<int> distr(range_from, range_to);
 
-  for (i = 0; i < page_count; ++i){
-	  addr[i] = pages + i * pagesize;
-	  int check_page = distr(generator);
-	  if (check_page < moved_pages){
-		  nodes[i] = remote_node;
-	  }
-	  else{
-		  nodes[i] = local_node;
-	  }
-	  status[i] = -123;
-  }*/
+   for (i = 0; i < page_count; ++i){
+   addr[i] = pages + i * pagesize;
+   int check_page = distr(generator);
+   if (check_page < moved_pages){
+   nodes[i] = remote_node;
+   }
+   else{
+   nodes[i] = local_node;
+   }
+   status[i] = -123;
+   }*/
 
   //try mbind if possible, to bind the pages that have not been allocated yet!
- /* struct bitmask *node_set = numa_bitmask_alloc(MAX_NODES);  // numa_allocate_nodemask();
-  numa_bitmask_setall(node_set);
+  /* struct bitmask *node_set = numa_bitmask_alloc(MAX_NODES);  // numa_allocate_nodemask();
+   numa_bitmask_setall(node_set);
 
-  DIEIF(
-          WRAP(mbind)(start, (moved_pages * pagesize), MPOL_INTERLEAVE, node_set->maskp, node_set->size + 1, MPOL_MF_MOVE | MPOL_MF_STRICT) != 0,
-          "mbind interleave failed");*/
-
+   DIEIF(
+   WRAP(mbind)(start, (moved_pages * pagesize), MPOL_INTERLEAVE, node_set->maskp, node_set->size + 1, MPOL_MF_MOVE | MPOL_MF_STRICT) != 0,
+   "mbind interleave failed");*/
 
   /*LINFO("Verifying after pages have been moved");
-  for( i = 0; i < page_count; i++){
-	  //LINFOF("Page %d vaddr=%p status=%d", i, page_base + i * pagesize, status[i]);
-	  if (status[i] != 1) {
-		  LINFOF("Bad page state before migrate_pages. Page %d vaddr=%p status %d", i, pages + i * pagesize, status[i]);
-		  break;
-		 // exit(1);
-	  }
-  }*/
+   for( i = 0; i < page_count; i++){
+   //LINFOF("Page %d vaddr=%p status=%d", i, page_base + i * pagesize, status[i]);
+   if (status[i] != 1) {
+   LINFOF("Bad page state before migrate_pages. Page %d vaddr=%p status %d", i, pages + i * pagesize, status[i]);
+   break;
+   // exit(1);
+   }
+   }*/
 
   free(addr);
   free(status);
@@ -686,7 +678,8 @@ void place_pages(MemorySegment &segment, double ratio) {
   //                       segment.pageAlignedLength(), ratio);
   //place_pages_weighted_dwp(segment.pageAlignedStartAddress(),
   //                         segment.pageAlignedLength(), ratio);
-  move_pages_remote(segment.pageAlignedStartAddress(), segment.pageAlignedLength(), ratio);
+  move_pages_remote(segment.pageAlignedStartAddress(),
+                    segment.pageAlignedLength(), ratio);
 }
 
 //place pages the adaptive way

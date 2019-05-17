@@ -23,11 +23,11 @@ void DisabledMode::printParameters() {
 }
 
 void DisabledMode::start() {
-   //get_elapsed_stall_rate();
+  //get_elapsed_stall_rate();
   // interleave memory by default
- /* LINFO("Setting default memory policy to interleaved");
-  set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
-                numa_get_mems_allowed()->size);*/
+  /* LINFO("Setting default memory policy to interleaved");
+   set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
+   numa_get_mems_allowed()->size);*/
 }
 
 }  // namespace unstickymem
