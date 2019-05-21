@@ -194,17 +194,21 @@ void move_pages_remote(void *start, unsigned long len, double remote_ratio) {
   if (remote_ratio <= 50) {
     interleaved_pages = (remote_ratio / 100 * (double) page_count) * MAX_NODES;
     //LINFOF("page_count:%d interleaved_pages:%d", page_count, (int) interleaved_pages);
-    for (i = 0; i < interleaved_pages; ++i) {
+    for (i = 0; i < page_count; ++i) {
       addr[i] = pages + i * pagesize;
-      if (i % 2 == 0) {
-        nodes[i] = local_node;
+      if (i < interleaved_pages){
+	      if (i % 2 == 0) {
+		      nodes[i] = local_node;
+	      } else {
+		      nodes[i] = remote_node;
+	      }
       } else {
-        nodes[i] = remote_node;
+	      nodes[i] = local_node;
       }
       status[i] = -123;
     }
 
-    rc = move_pages(0, interleaved_pages, addr, nodes, status, MPOL_MF_MOVE);
+    rc = move_pages(0, page_count, addr, nodes, status, MPOL_MF_MOVE);
     if (rc < 0 && errno != ENOENT) {
       perror("move_pages");
       exit(1);

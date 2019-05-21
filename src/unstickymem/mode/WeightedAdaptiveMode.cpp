@@ -63,6 +63,7 @@ void WeightedAdaptiveMode::adaptiveThread() {
   double prev_stall_rate = std::numeric_limits<double>::infinity();
   double best_stall_rate = std::numeric_limits<double>::infinity();
   double stall_rate;
+  double interval_difference;
 
   get_stall_rate_v2();
   //get_elapsed_stall_rate();
@@ -71,11 +72,19 @@ void WeightedAdaptiveMode::adaptiveThread() {
   MemoryMap &segments = MemoryMap::getInstance();
   //segments.print();
   //double i = 50;
-  //for (double i = 0; i <= 100; i += ADAPTATION_STEP) {
-  //LINFOF("Going to check a ratio of %lf", i);
-  //place_all_pages(segments, i);
-  //sleep(5);
-  //}
+  /*LINFO("Moving forward!");
+  for (double i = 0; i <= 100; i += ADAPTATION_STEP) {
+  LINFOF("Going to check a ratio of %lf", i);
+  place_all_pages(segments, i);
+  sleep(5);
+  }
+
+  LINFO("Moving backwards");
+  for (double i = 100; i >= 0; i -= ADAPTATION_STEP) {
+  LINFOF("Going to check a ratio of %lf", i);
+  place_all_pages(segments, i);
+  sleep(5);
+  }*/
   // slowly achieve awesomeness - asymmetric weights version!
   double i;
   //bool terminate = false;
@@ -100,18 +109,39 @@ void WeightedAdaptiveMode::adaptiveThread() {
     LINFOF("Ratio: %lf StallRate: %1.10lf (previous %1.10lf; best %1.10lf)", i,
            stall_rate, prev_stall_rate, best_stall_rate);
 
+    //check the interval difference
+    interval_difference = stall_rate - prev_stall_rate;
+    interval_difference = fabs(interval_difference);
+    LINFOF("interval difference: %1.6lf", interval_difference);
+
+    interval_difference = round(interval_difference * 100) / 100;
+    LINFOF("interval difference rounded off: %1.2lf", interval_difference);
+
+    //if the difference between the stall rate is so small, just stop
+    if(interval_difference < 0.01){
+	    LINFO("Minimal interval difference, No need to climb!");
+	    //before stopping go one step back and break
+	    //place_all_pages(segments, (i - ADAPTATION_STEP));
+	   // LINFOF("Final Ratio: %lf", (i - ADAPTATION_STEP));
+	    break;
+    }
+
     // compute the minimum rate
     best_stall_rate = std::min(best_stall_rate, stall_rate);
     // check if we are geting worse
     if (stall_rate > best_stall_rate * 1.001) {
       // just make sure that its not something transient...!
-      LINFO("Hmm... Is this the best we can do?");
-      if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
-                                 _num_poll_outliers * 2)
-          > (best_stall_rate * 1.001)) {
-        LINFO("I guess so!");
+     // LINFO("Hmm... Is this the best we can do?");
+     // if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
+     //                            _num_poll_outliers * 2)
+     //     > (best_stall_rate * 1.001)) {
+     //   LINFO("I guess so!");
+	LINFO("Going one step back before breaking!");
+	//before stopping go one step back and break
+        place_all_pages(segments, (i - ADAPTATION_STEP));
+	LINFOF("Final Ratio: %lf", (i - ADAPTATION_STEP));
         break;
-      }
+     // }
     }
     prev_stall_rate = stall_rate;
   }

@@ -20,7 +20,7 @@ int main() {
   }
 
   unstickymem_start();
-  sleep(60);
+  sleep(120);
   free(x);
   return 0;
 }
