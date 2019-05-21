@@ -73,18 +73,18 @@ void WeightedAdaptiveMode::adaptiveThread() {
   //segments.print();
   //double i = 50;
   /*LINFO("Moving forward!");
-  for (double i = 0; i <= 100; i += ADAPTATION_STEP) {
-  LINFOF("Going to check a ratio of %lf", i);
-  place_all_pages(segments, i);
-  sleep(5);
-  }
+   for (double i = 0; i <= 100; i += ADAPTATION_STEP) {
+   LINFOF("Going to check a ratio of %lf", i);
+   place_all_pages(segments, i);
+   sleep(5);
+   }
 
-  LINFO("Moving backwards");
-  for (double i = 100; i >= 0; i -= ADAPTATION_STEP) {
-  LINFOF("Going to check a ratio of %lf", i);
-  place_all_pages(segments, i);
-  sleep(5);
-  }*/
+   LINFO("Moving backwards");
+   for (double i = 100; i >= 0; i -= ADAPTATION_STEP) {
+   LINFOF("Going to check a ratio of %lf", i);
+   place_all_pages(segments, i);
+   sleep(5);
+   }*/
   // slowly achieve awesomeness - asymmetric weights version!
   double i;
   //bool terminate = false;
@@ -118,12 +118,12 @@ void WeightedAdaptiveMode::adaptiveThread() {
     LINFOF("interval difference rounded off: %1.2lf", interval_difference);
 
     //if the difference between the stall rate is so small, just stop
-    if(interval_difference < 0.01){
-	    LINFO("Minimal interval difference, No need to climb!");
-	    //before stopping go one step back and break
-	    //place_all_pages(segments, (i - ADAPTATION_STEP));
-	   // LINFOF("Final Ratio: %lf", (i - ADAPTATION_STEP));
-	    break;
+    if (interval_difference < 0.01) {
+      LINFO("Minimal interval difference, No need to climb!");
+      //before stopping go one step back and break
+      //place_all_pages(segments, (i - ADAPTATION_STEP));
+      // LINFOF("Final Ratio: %lf", (i - ADAPTATION_STEP));
+      break;
     }
 
     // compute the minimum rate
@@ -131,17 +131,17 @@ void WeightedAdaptiveMode::adaptiveThread() {
     // check if we are geting worse
     if (stall_rate > best_stall_rate * 1.001) {
       // just make sure that its not something transient...!
-     // LINFO("Hmm... Is this the best we can do?");
-     // if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
-     //                            _num_poll_outliers * 2)
-     //     > (best_stall_rate * 1.001)) {
-     //   LINFO("I guess so!");
-	LINFO("Going one step back before breaking!");
-	//before stopping go one step back and break
-        place_all_pages(segments, (i - ADAPTATION_STEP));
-	LINFOF("Final Ratio: %lf", (i - ADAPTATION_STEP));
-        break;
-     // }
+      // LINFO("Hmm... Is this the best we can do?");
+      // if (get_average_stall_rate(_num_polls * 2, _poll_sleep,
+      //                            _num_poll_outliers * 2)
+      //     > (best_stall_rate * 1.001)) {
+      //   LINFO("I guess so!");
+      LINFO("Going one step back before breaking!");
+      //before stopping go one step back and break
+      place_all_pages(segments, (i - ADAPTATION_STEP));
+      LINFOF("Final Ratio: %lf", (i - ADAPTATION_STEP));
+      break;
+      // }
     }
     prev_stall_rate = stall_rate;
   }
