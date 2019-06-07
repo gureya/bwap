@@ -11,6 +11,9 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/containers/list.hpp>
 
+#include <boost/interprocess/containers/vector.hpp>
+#include <boost/interprocess/allocators/allocator.hpp>
+
 #include "unstickymem/memory/MemorySegment.hpp"
 
 namespace unstickymem {

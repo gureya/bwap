@@ -8,11 +8,11 @@
 #define NUM_ELEMS SIZE / sizeof(int)
 
 int main() {
-  printf("Hello world\n");
+  printf("Hello world from processID %d\n", getpid());  
 
   int *x = malloc(SIZE);
   printf("acessing unallocated value: %d\n", x[0]);
-  printf("x_base: %p, size(mb): %d\n", x, SIZE / 1000);
+  printf("x_base: %p, size(mb): %d\n", x, SIZE / 1024);
   // unstickymem_start();
   x[0] = 123;
   for (size_t i = 1; i < NUM_ELEMS; i++) {
@@ -20,7 +20,7 @@ int main() {
   }
 
   unstickymem_start();
-  sleep(120);
+  sleep(60);
   free(x);
   return 0;
 }

@@ -184,9 +184,9 @@ void move_pages_remote(void *start, unsigned long len, double remote_ratio) {
   //set the remote and local nodes here
   if (OPT_NUM_WORKERS_VALUE == 2) {
     remote_node = 0;
-    local_node = 1;
+    local_node = 0;
   } else {
-    remote_node = 1;
+    remote_node = 0;
     local_node = 0;
   }
 
