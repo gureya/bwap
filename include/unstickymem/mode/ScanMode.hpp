@@ -9,6 +9,7 @@ namespace unstickymem {
 
 class ScanMode : public Mode {
  private:
+  bool _started = false;
   unsigned int _wait_start;
   unsigned int _num_polls;
   unsigned int _num_poll_outliers;
@@ -32,6 +33,7 @@ class ScanMode : public Mode {
   void printParameters();
   void scannerThread();
   void start();
+  void processSegmentAddition(const MemorySegment& segment);
 };
 
 }  // namespace unstickymem

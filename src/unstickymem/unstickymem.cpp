@@ -31,7 +31,12 @@ double sum_ww = 0;
 double sum_nww = 0;
 // number of workers
 static bool OPT_NUM_WORKERS = false;
+static bool WEIGHTS = false;
+bool MONITORING_CORE = false;
+static bool PMC = false;
 int OPT_NUM_WORKERS_VALUE = 1;
+int MONITORING_CORE_VALUE = 0;
+int PMC_VALUE = 0;
 
 namespace unstickymem {
 
@@ -45,11 +50,32 @@ void read_config(void) {
   if (OPT_NUM_WORKERS) {
     OPT_NUM_WORKERS_VALUE = std::stoi(std::getenv("UNSTICKYMEM_WORKERS"));
   }
+
+  WEIGHTS = std::getenv("BWAP_WEIGHTS") != nullptr;
+  if (WEIGHTS) {
+    char* weights = std::getenv("BWAP_WEIGHTS");
+    read_weights(weights);
+  } else {
+    LDEBUG("Sorry, Weights have not been provided!");
+    exit (EXIT_FAILURE);
+  }
+
+  MONITORING_CORE = std::getenv("BWAP_CORE") != nullptr;
+  if (MONITORING_CORE) {
+    MONITORING_CORE_VALUE = std::stoi(std::getenv("BWAP_CORE"));
+  }
+
+  PMC = std::getenv("BWAP_PMC") != nullptr;
+  if (PMC) {
+    PMC_VALUE = std::stoi(std::getenv("BWAP_PMC"));
+  }
 }
 
 void print_config(void) {
   LINFOF("num_workers: %s",
          OPT_NUM_WORKERS ? std::to_string(OPT_NUM_WORKERS_VALUE).c_str() : "no");
+  LINFOF("monitoring_core: %s",
+         MONITORING_CORE ? std::to_string(MONITORING_CORE_VALUE).c_str() : "no");
 }
 
 // library initialization
@@ -59,15 +85,15 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
   // initialize pointers to wrapped functions
   unstickymem::init_real_functions();
 
-  // initialize likwid
-  initialize_likwid();
-
   // parse and display the configuration
-  read_config();
-  print_config();
+  //read_config();
+  //print_config();
+
+  // initialize likwid
+  //initialize_likwid();
 
   //set sum_ww & sum_nww & initialize the weights!
-  get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
+  //get_sum_nww_ww(OPT_NUM_WORKERS_VALUE);
 
   // set default memory policy to interleaved
   /*LDEBUG("Setting default memory policy to interleaved");
@@ -92,11 +118,11 @@ __attribute((destructor)) void libunstickymem_finalize(void) {
   // boost::interprocess::shared_memory_object::remove("unstickymem");
 
   //get the elapsed stall_rate
-  double stall_rate = get_elapsed_stall_rate();
-  unstickymem_log_v1(stall_rate, runtime->_mode_name);
+  //double stall_rate = get_elapsed_stall_rate();
+  //unstickymem_log_v1(stall_rate, runtime->_mode_name);
 
   // stop all the counters
-  stop_all_counters();
+  //stop_all_counters();
   LINFO("Finalized");
 }
 
@@ -129,6 +155,7 @@ void unstickymem_print_memory(void) {
   unstickymem::memory->print();
 }
 
+//TODO: Include the worker/non-worker flag as part of this!
 void read_weights(char filename[]) {
   FILE * fp;
   char * line = NULL;
@@ -152,7 +179,7 @@ void read_weights(char filename[]) {
 
   fp = fopen(filename, "r");
   if (fp == NULL) {
-    printf("Weights have not been provided!\n");
+    printf("Weights have not been provided, empty file or wrong file name!\n");
     exit (EXIT_FAILURE);
   }
 
@@ -173,12 +200,12 @@ void read_weights(char filename[]) {
     j++;
   }
 
-  /* int i;
-   printf("Initial Weights:\t");
-   for (i = 0; i < MAX_NODES; i++) {
-   printf("id: %d w: %.1f\t", nodes_info[i].id, nodes_info[i].weight);
-   }
-   printf("\n");*/
+  int i;
+  printf("Initial Weights:\t");
+  for (i = 0; i < MAX_NODES; i++) {
+    printf("id: %d w: %.1f\t", nodes_info[i].id, nodes_info[i].weight);
+  }
+  printf("\n");
 
   fclose(fp);
   if (line)
@@ -194,8 +221,6 @@ void get_sum_nww_ww(int num_workers) {
 
   if (num_workers == 1) {
     //workers: 0
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_1w.txt";
-    read_weights(weights);
     //printf("Worker Nodes:\t");
     LDEBUG("Worker Nodes: 0");
     for (i = 0; i < MAX_NODES; i++) {
@@ -207,65 +232,78 @@ void get_sum_nww_ww(int num_workers) {
       }
     }
   } else if (num_workers == 2) {
-    //workers: 0,1
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_2w.txt";
-    read_weights(weights);
+    //workers: 1
     //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 0,1");
+    LDEBUG("Worker Nodes: 1");
     for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 0 || nodes_info[i].id == 1) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+      if (nodes_info[i].id == 1) {
+        //printf("nodes_info[%d].id=%d", i, nodes_info[i].id);
         sum_ww += nodes_info[i].weight;
       } else {
         sum_nww += nodes_info[i].weight;
       }
     }
-  } else if (num_workers == 3) {
-    //workers: 1,2,3
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_3w.txt";
-    read_weights(weights);
-    //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 1,2,3");
-    for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 1 || nodes_info[i].id == 2
-          || nodes_info[i].id == 3) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
-        sum_ww += nodes_info[i].weight;
-      } else {
-        sum_nww += nodes_info[i].weight;
-      }
-    }
-  } else if (num_workers == 4) {
-    //workers: 0,1,2,3
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_4w.txt";
-    read_weights(weights);
-    //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 0,1,2,3");
-    for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 0 || nodes_info[i].id == 1
-          || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
-        sum_ww += nodes_info[i].weight;
-      } else {
-        sum_nww += nodes_info[i].weight;
-      }
-    }
-  } else if (num_workers == 8) {
-    //workers: all
-    char weights[] = "/home/dgureya/devs/unstickymem/config/weights_8w.txt";
-    read_weights(weights);
-    //printf("Worker Nodes:\t");
-    LDEBUG("Worker Nodes: 0,1,2,3");
-    for (i = 0; i < MAX_NODES; i++) {
-      if (nodes_info[i].id == 0 || nodes_info[i].id == 1
-          || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
-        //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
-        sum_ww += nodes_info[i].weight;
-      } else {
-        sum_nww += nodes_info[i].weight;
-      }
-    }
-  } else {
+  }
+  /*else if (num_workers == 2) {
+   //workers: 0,1
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_2w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 0,1");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 0 || nodes_info[i].id == 1) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } else if (num_workers == 3) {
+   //workers: 1,2,3
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_3w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 1,2,3");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 1 || nodes_info[i].id == 2
+   || nodes_info[i].id == 3) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } else if (num_workers == 4) {
+   //workers: 0,1,2,3
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_4w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 0,1,2,3");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 0 || nodes_info[i].id == 1
+   || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } else if (num_workers == 8) {
+   //workers: all
+   char weights[] = "/home/dgureya/devs/unstickymem/config/weights_8w.txt";
+   read_weights(weights);
+   //printf("Worker Nodes:\t");
+   LDEBUG("Worker Nodes: 0,1,2,3");
+   for (i = 0; i < MAX_NODES; i++) {
+   if (nodes_info[i].id == 0 || nodes_info[i].id == 1
+   || nodes_info[i].id == 2 || nodes_info[i].id == 3) {
+   //printf("nodes_info[%d].id=%d\t", i, nodes_info[i].id);
+   sum_ww += nodes_info[i].weight;
+   } else {
+   sum_nww += nodes_info[i].weight;
+   }
+   }
+   } */else {
     LDEBUGF("Sorry, %d workers is not supported at the moment!", num_workers);
     exit (EXIT_FAILURE);
   }

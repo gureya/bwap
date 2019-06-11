@@ -20,10 +20,9 @@
 namespace unstickymem {
 
 static bool initiatialized = false;
-static FILE *f = fopen("/home/dgureya/devs/unstickymem/unstickymem_log.txt",
-                       "a");
-static FILE *f_1 = fopen("/home/dgureya/devs/unstickymem/elapsed_stall_rate_log.txt",
-                        "a");
+//TODO: Remove this hard-coded file parts!
+static FILE *f = fopen("/home/dgureya/bwap/unstickymem_log.txt", "a");
+static FILE *f_1 = fopen("/home/dgureya/bwap/elapsed_stall_rate_log.txt", "a");
 
 //output stall rate to a log file
 void unstickymem_log(double ratio, double sr) {
@@ -41,9 +40,9 @@ void unstickymem_log_v1(double sr, std::string mode) {
   fprintf(f_1, "%s: elapsed stall rate\t%1.2lf\n", mode.c_str(), sr);
 }
 
-
 /*
  * A function that uses the likwid library to measure the stall rates
+ * Credits: https://github.com/RRZE-HPC/likwid/blob/master/examples/C-likwidAPI.c
  *
  * On AMD we use the following counters
  * EventSelect 0D1h Dispatch Stalls: The number of processor cycles where the decoder
@@ -70,14 +69,24 @@ static int active_cpus;
 
 //list of all the events for the different architectures supported
 //char amd_estr[] = "CPU_CLOCKS_UNHALTED:PMC0,DISPATCH_STALLS:PMC1"; //AMD
-char amd_estr[] = "DISPATCH_STALLS:PMC0";  //AMD DISPATCH_STALL_LDQ_FULL,DISPATCH_STALL_FP_SCHED_Q_FULL
+//char amd_estr[] = "DISPATCH_STALLS:PMC0";  //AMD DISPATCH_STALL_LDQ_FULL,DISPATCH_STALL_FP_SCHED_Q_FULL
+char const *amd_estr = "DISPATCH_STALLS:PMC0";
 //char amd_estr[] = "DISPATCH_STALL_INSTRUCTION_RETIRED_Q_FULL:PMC0";
 //char intel_estr[] =
 //		"CPU_CLOCK_UNHALTED_THREAD_P:PMC0,RESOURCE_STALLS_ANY:PMC1"; //Intel Broadwell EP
-char intel_estr[] = "RESOURCE_STALLS_ANY:PMC0";  //Intel Broadwell EP
+//char intel_estr[] = "RESOURCE_STALLS_ANY:PMC0";  //Intel Broadwell EP, Intel Core Westmere processor
+char const *intel_estr = "RESOURCE_STALLS_ANY:PMC0";
+//if a specific pmc has been specified override the above variables!
+void check_pmc() {
+  if (PMC_VALUE == 1) {
+    amd_estr = "DISPATCH_STALLS:PMC1";
+    intel_estr = "RESOURCE_STALLS_ANY:PMC1";
+  }
+}
 
 void initialize_likwid() {
   if (!initiatialized) {
+    check_pmc();
     //perfmon_setVerbosity(3);
     //Load the topology module and print some values.
     err = topology_init();
@@ -102,7 +111,7 @@ void initialize_likwid() {
     ncpus_per_node = ncpus / nnodes;
 
     //active_cpus = OPT_NUM_WORKERS_VALUE * ncpus_per_node;
-    OPT_NUM_WORKERS_VALUE=3;
+    //OPT_NUM_WORKERS_VALUE=3;
     active_cpus = 1;
 
     LINFOF(
@@ -112,25 +121,24 @@ void initialize_likwid() {
     //cpus = (int*) malloc(topo->numHWThreads * sizeof(int));
     //for now only monitor one CPU
     cpus = (int*) malloc(active_cpus * sizeof(int));
-   
+
     if (!cpus)
       exit(-1);		//return 1;
 
-    if (OPT_NUM_WORKERS_VALUE == 3) {
-    for (int i = 0; i < active_cpus; i++) {
-      cpus[i] = 8;
-      //printf("cpu[%d]\n", cpus[i]);
-      //printf("threadpool[%d]", topo->threadPool[i].apicId);
-      //exit(-1);
+    //If monitoring core has not been specified, then we assume core Zero as the monitoring core
+    if (MONITORING_CORE) {
+      for (int i = 0; i < active_cpus; i++) {
+        cpus[i] = MONITORING_CORE_VALUE;
+      }
+      LINFOF("Monitoring core has been specified ! MONITORING_CORE_VALUE - %d",
+             MONITORING_CORE_VALUE);
+    } else {
+      for (int i = 0; i < active_cpus; i++) {
+        cpus[i] = topo->threadPool[i].apicId;
+      }
+      LINFOF("Monitoring core has not been specified ! using default core - %d",
+             MONITORING_CORE_VALUE);
     }
-  } else {
-    for (int i = 0; i < active_cpus; i++) {
-      cpus[i] = topo->threadPool[i].apicId;
-      //printf("threadpool[%d]\n", topo->threadPool[i].apicId);
-      //printf("cpu[%d]", cpus[i]);
-      //exit(-1);
-    }
-  }
 
     // Must be called before perfmon_init() but only if you want to use another
     // access mode as the pre-configured one. For direct access (0) you have to
@@ -210,7 +218,7 @@ void initialize_likwid() {
 }
 
 double get_elapsed_stall_rate() {
-  int i, j;
+  //int i, j;
   double result = 0.0;
 
   //static double prev_cycles = 0;
@@ -232,7 +240,7 @@ double get_elapsed_stall_rate() {
   // For now just read/print for the active cores only, actually just one core at the moment!
   // double cycles = 0;
   double stalls = 0;
-  j = 0;
+  //j = 0;
   // char* ptr = NULL;
   //Results depending on the architecture!
   if (info->isIntel == 1) {
@@ -249,26 +257,25 @@ double get_elapsed_stall_rate() {
 
   //while (ptr != NULL) {
   //for (i = 0; i < active_cpus; i++) {
-    //result = perfmon_getResult(gid, j, i);
-    //if (j == 0) {
-    //  cycles += result;
-    //} else {
-    //stalls += result;
-    //}
-    //printf("Measurement result for event set %s at CPU %d: %f\n", ptr,
-    //    cpus[i], result);
+  //result = perfmon_getResult(gid, j, i);
+  //if (j == 0) {
+  //  cycles += result;
+  //} else {
+  //stalls += result;
+  //}
+  //printf("Measurement result for event set %s at CPU %d: %f\n", ptr,
+  //    cpus[i], result);
   //}
   //  ptr = strtok(NULL, ",");
   //  j++;
   //}
-   if (OPT_NUM_WORKERS_VALUE == 3) {
+  if (MONITORING_CORE) {
     result = perfmon_getResult(gid, 0, 0);
     stalls += result;
   } else {
     result = perfmon_getResult(gid, 0, 0);
     stalls += result;
   }
-
 
   uint64_t clock = readtsc();  // read clock
   //double stall_rate = (stalls - prev_stalls) / (cycles - prev_cycles);
@@ -298,9 +305,8 @@ double get_elapsed_stall_rate() {
   return stall_rate;
 }
 
-
 double get_stall_rate_v2() {
-  int i, j;
+  //int i, j;
   double result = 0.0;
 
   //static double prev_cycles = 0;
@@ -322,7 +328,7 @@ double get_stall_rate_v2() {
   // For now just read/print for the active cores only, actually just one core at the moment!
   // double cycles = 0;
   double stalls = 0;
-  j = 0;
+  //j = 0;
   // char* ptr = NULL;
   //Results depending on the architecture!
   if (info->isIntel == 1) {
@@ -339,26 +345,25 @@ double get_stall_rate_v2() {
 
   //while (ptr != NULL) {
   //for (i = 0; i < active_cpus; i++) {
-    //result = perfmon_getResult(gid, j, i);
-    //if (j == 0) {
-    //	cycles += result;
-    //} else {
-    //stalls += result;
-    //}
-    //printf("Measurement result for event set %s at CPU %d: %f\n", ptr,
-    //		cpus[i], result);
+  //result = perfmon_getResult(gid, j, i);
+  //if (j == 0) {
+  //	cycles += result;
+  //} else {
+  //stalls += result;
+  //}
+  //printf("Measurement result for event set %s at CPU %d: %f\n", ptr,
+  //		cpus[i], result);
   //}
   //	ptr = strtok(NULL, ",");
   //	j++;
   //}
-  if (OPT_NUM_WORKERS_VALUE == 3) {
+  if (MONITORING_CORE) {
     result = perfmon_getResult(gid, 0, 0);
     stalls += result;
   } else {
     result = perfmon_getResult(gid, 0, 0);
     stalls += result;
   }
-
 
   uint64_t clock = readtsc();  // read clock
   //double stall_rate = (stalls - prev_stalls) / (cycles - prev_cycles);
@@ -462,11 +467,12 @@ double get_average_stall_rate(size_t num_measurements,
   measurements.erase(measurements.begin(),
                      measurements.begin() + num_outliers_to_filter);
 
-  int i = 0;
-  for (auto m : measurements) {
-    unstickymem_log(i, m);
-    i++;
-  }
+  //for logging individual measurements!
+  /*int i = 0;
+   for (auto m : measurements) {
+   unstickymem_log(i, m);
+   i++;
+   }*/
 
   // return the average
   double sum = std::accumulate(measurements.begin(), measurements.end(), 0.0);
