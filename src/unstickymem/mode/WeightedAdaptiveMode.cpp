@@ -54,11 +54,11 @@ void WeightedAdaptiveMode::processSegmentAddition(
 ///*  if (!_started) {
   //   return;
   // }
-  //if (segment.length() > (1UL << 14)) {
-  //segment.print();
-  //LINFOF("segment size (MB): %lu", segment.length() / (1024 * 1024));
-  //place_pages_weighted_initial(segment);
-  // }
+  if (segment.length() > (1UL << 14)) {
+    //segment.print();
+    //LINFOF("segment size (MB): %lu", segment.length() / (1024 * 1024));
+    place_pages_weighted_initial(segment);
+  }
   //*/
 }
 

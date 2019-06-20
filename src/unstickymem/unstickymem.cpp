@@ -86,7 +86,7 @@ __attribute__((constructor)) void libunstickymem_initialize(void) {
   unstickymem::init_real_functions();
 
   // parse and display the configuration
-  //read_config();
+  read_config();
   //print_config();
 
   // initialize likwid
