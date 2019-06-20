@@ -54,11 +54,11 @@ void WeightedAdaptiveMode::processSegmentAddition(
 ///*  if (!_started) {
   //   return;
   // }
-  if (segment.length() > (1UL << 14)) {
-    //segment.print();
-    //LINFOF("segment size (MB): %lu", segment.length() / (1024 * 1024));
-    //place_pages_weighted_initial(segment);
-  }
+  //if (segment.length() > (1UL << 14)) {
+  //segment.print();
+  //LINFOF("segment size (MB): %lu", segment.length() / (1024 * 1024));
+  //place_pages_weighted_initial(segment);
+  // }
   //*/
 }
 
@@ -116,6 +116,7 @@ void WeightedAdaptiveMode::adaptiveThread() {
         MySharedMemory sharedmemory(mem_segment.pageAlignedStartAddress(),
                                     mem_segment.pageAlignedLength(), processID);
         myvector->push_back(sharedmemory);
+        //LINFOF("start %p", mem_segment.pageAlignedStartAddress());
       }
     }
 

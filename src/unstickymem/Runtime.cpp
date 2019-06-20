@@ -108,8 +108,9 @@ std::shared_ptr<Mode> Runtime::getMode() {
 }
 
 void Runtime::startSelectedMode() {
-  LINFO("Mode parameters:");
-  _mode->printParameters();
+  //LINFO("Mode parameters:");
+  //_mode->printParameters();
+  LINFO("Starting the Mode:");
   _mode->start();
 }
 
