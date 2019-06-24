@@ -115,6 +115,8 @@ void ScanMode::start() {
    set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
    numa_get_mems_allowed()->size);*/
 
+  return;
+
   // start scanner thread
   std::thread scanThread(&ScanMode::scannerThread, this);
 
