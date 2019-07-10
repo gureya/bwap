@@ -704,8 +704,10 @@ void place_pages_weighted_initial(const MemorySegment &segment) {
     // LINFOF("segment %s [%p:%p]", segment.name().c_str(), segment.startAddress(),
     //      segment.endAddress());
     //segment.print();
-    place_pages_weighted_initial(segment.pageAlignedStartAddress(),
-                                 segment.pageAlignedLength());
+   // place_pages_weighted_initial(segment.pageAlignedStartAddress(),
+   //                              segment.pageAlignedLength());
+    move_pages_initial(segment.pageAlignedStartAddress(),
+                                     segment.pageAlignedLength());
   }
 }
 
@@ -764,6 +766,95 @@ void place_pages_weighted_contiguous(void *addr, unsigned long len) {
   }
 
   numa_bitmask_free(node_set_initial);
+}
+
+//initial page placement with weighted interleave
+void move_pages_initial(void *start, unsigned long len) {
+
+  pagesize = numa_pagesize();
+
+  char *pages;
+
+  int i, j, rc;
+
+  void **addr;
+  int *status;
+  int *nodes;
+
+  int page_count = len / pagesize;
+
+  addr = (void **) malloc(sizeof(char *) * page_count);
+  status = (int *) malloc(page_count * sizeof(int *));
+  nodes = (int *) malloc(page_count * sizeof(int *));
+
+  if (!start || !addr || !status || !nodes) {
+    LINFO("Unable to allocate memory");
+    exit(1);
+  }
+
+  pages = (char *) start;
+
+  //uniform distribution memory allocation (using the bwap style format)
+  //first set the page addresses, openmp for faster processing
+//#pragma omp parallel for firstprivate(pages,pagesize)
+  for (i = 0; i < page_count; i++) {
+    addr[i] = pages + i * pagesize;
+    nodes[i] = 0;  //incase the last page is not initialized
+  }
+
+  //set the page distribution using a weighted version
+  double i_p;  //interleaved_pages
+  double w = 0;  // weight that has already been allocated among the nodes that can still receive pages
+  int a = MAX_NODES;  // number of nodes which can still receive pages
+  int i_k = 0;  //lower_bound for the pages
+  int r_pages = 0;  //remaining pages
+  int my_node;  //the node of a page
+
+  //create a vector of node id's
+  std::vector<int> node_ids;
+  for (i = 0; i < MAX_NODES; i++) {
+    node_ids.push_back(nodes_info[i].id);
+  }
+
+  for (i = 0; i < MAX_NODES; i++) {
+
+    double b = nodes_info[i].weight - w;
+    i_p = a * (b / 100) * page_count;
+
+    r_pages = page_count - i_k;
+    if (i_p > r_pages) {
+      i_p = r_pages;
+    }
+
+    if (i_k == page_count) {
+      break;
+    }
+
+    if (i_p != 0) {
+      int upper_bound = i_k + i_p;
+      for (j = i_k; j < upper_bound; j++) {
+        my_node = j % a;
+        nodes[j] = node_ids.at(my_node);
+      }
+    }
+
+    node_ids.erase(node_ids.begin());
+    a--;
+    w = nodes_info[i].weight;
+    i_k += i_p;
+
+  }
+
+  //get_node_mappings(page_count, nodes);
+  rc = move_pages(0, page_count, addr, nodes, status, MPOL_MF_MOVE);
+  if (rc < 0 && errno != ENOENT) {
+    perror("move_pages");
+    exit(1);
+  }
+
+  free(addr);
+  free(status);
+  free(nodes);
 }
 
 // interleave pages using the weights - use the initial weights!
