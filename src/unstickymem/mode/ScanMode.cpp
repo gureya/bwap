@@ -115,6 +115,14 @@ void ScanMode::start() {
    set_mempolicy(MPOL_INTERLEAVE, numa_get_mems_allowed()->maskp,
    numa_get_mems_allowed()->size);*/
 
+  MemoryMap &segments = MemoryMap::getInstance();
+  for (auto &segment : segments) {
+    if (segment.length() > (1UL << 14)) {
+      // segment.print();
+      place_pages_weighted_initial(segment);
+    }
+  }
+
   return;
 
   // start scanner thread
