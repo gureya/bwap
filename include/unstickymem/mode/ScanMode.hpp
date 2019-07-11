@@ -33,6 +33,7 @@ class ScanMode : public Mode {
   void printParameters();
   void scannerThread();
   void start();
+  void startMemInit();
   void processSegmentAddition(const MemorySegment& segment);
 };
 

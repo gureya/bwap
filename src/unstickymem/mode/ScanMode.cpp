@@ -132,4 +132,7 @@ void ScanMode::start() {
   scanThread.detach();
 }
 
+void ScanMode::startMemInit() {
+}
+
 }  // namespace unstickymem

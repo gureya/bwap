@@ -103,4 +103,7 @@ void FixedRatioMode::start() {
   pollThread.detach();
 }
 
+void FixedRatioMode::startMemInit() {
+}
+
 }  // namespace unstickymem

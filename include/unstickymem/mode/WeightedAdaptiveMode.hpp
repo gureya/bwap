@@ -31,6 +31,8 @@ class WeightedAdaptiveMode : public Mode {
   void printParameters();
   void adaptiveThread();
   void start();
+  void startMemInit();
+  void memInitThread();
   void processSegmentAddition(const MemorySegment& segment);
 };
 

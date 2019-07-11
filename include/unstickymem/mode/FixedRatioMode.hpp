@@ -31,6 +31,7 @@ class FixedRatioMode : public Mode {
   void printParameters();
   void pollerThread();
   void start();
+  void startMemInit();
   void processSegmentAddition(const MemorySegment& segment);
 };
 

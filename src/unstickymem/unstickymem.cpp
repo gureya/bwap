@@ -38,6 +38,8 @@ int OPT_NUM_WORKERS_VALUE = 1;
 int MONITORING_CORE_VALUE = 0;
 int PMC_VALUE = 0;
 
+int MEM_INIT = 0;
+
 namespace unstickymem {
 
 static bool is_initialized = false;
@@ -150,6 +152,14 @@ void unstickymem_start(void) {
   LDEBUG("Starting the unstickymem thread!");
   unstickymem::runtime->startSelectedMode();
 }
+
+void unstickymem_initialize(void) {
+  LDEBUG("Initializing the memory of the application!");
+  unstickymem::runtime->startMemoryInitialization();
+  LDEBUG("Finished initializing the memory of the application!");
+}
+
+
 
 void unstickymem_print_memory(void) {
   unstickymem::memory->print();

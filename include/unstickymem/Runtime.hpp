@@ -33,6 +33,7 @@ class Runtime {
   void printConfiguration();
   std::shared_ptr<Mode> getMode();
   void startSelectedMode();
+  void startMemoryInitialization();
 };
 
 }  // namespace unstickymem

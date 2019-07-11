@@ -23,6 +23,7 @@ class DisabledMode : public Mode {
   void printParameters();
 
   void start();
+  void startMemInit();
 };
 
 }  // namespace unstickymem

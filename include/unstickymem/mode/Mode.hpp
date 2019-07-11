@@ -29,6 +29,7 @@ class Mode {
   virtual po::options_description getOptions() = 0;
   virtual void printParameters() = 0;
   virtual void start() = 0;
+  virtual void startMemInit() = 0;
 
   virtual void processSegmentAddition(const MemorySegment& segment) {
   }

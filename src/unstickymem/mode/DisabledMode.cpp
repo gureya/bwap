@@ -30,4 +30,7 @@ void DisabledMode::start() {
    numa_get_mems_allowed()->size);*/
 }
 
+void DisabledMode::startMemInit() {
+}
+
 }  // namespace unstickymem

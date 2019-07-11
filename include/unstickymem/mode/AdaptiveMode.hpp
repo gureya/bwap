@@ -28,6 +28,7 @@ class AdaptiveMode : public Mode {
   void printParameters();
   void adaptiveThread();
   void start();
+  void startMemInit();
 };
 
 }  // namespace unstickymem

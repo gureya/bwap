@@ -114,4 +114,11 @@ void Runtime::startSelectedMode() {
   _mode->start();
 }
 
+void Runtime::startMemoryInitialization() {
+  //LINFO("Mode parameters:");
+  //_mode->printParameters();
+  LINFO("Starting the Memory Initialization:");
+  _mode->startMemInit();
+}
+
 }  // namespace unstickymem

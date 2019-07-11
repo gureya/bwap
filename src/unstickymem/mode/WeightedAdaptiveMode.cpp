@@ -236,11 +236,33 @@ void WeightedAdaptiveMode::start() {
 
    _started = true;
    */
+  MEM_INIT = 1;
   // start adaptive thread
   std::thread adaptiveThread(&WeightedAdaptiveMode::adaptiveThread, this);
 
   // dont want for it to finish
   adaptiveThread.detach();
+}
+
+void WeightedAdaptiveMode::startMemInit() {
+  // start memInit thread
+  std::thread memInitThread(&WeightedAdaptiveMode::memInitThread, this);
+
+  // dont want for it to finish
+  memInitThread.detach();
+}
+
+void WeightedAdaptiveMode::memInitThread() {
+  MemoryMap &segments = MemoryMap::getInstance();
+  while (MEM_INIT == 0) {
+    for (auto &segment : segments) {
+      if (segment.length() > (1UL << 14)) {
+        // segment.print();
+        place_pages_weighted_initial(segment);
+      }
+    }
+    sleep(1);
+  }
 }
 
 }  // namespace unstickymem
