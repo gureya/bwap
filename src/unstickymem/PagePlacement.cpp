@@ -704,10 +704,10 @@ void place_pages_weighted_initial(const MemorySegment &segment) {
     // LINFOF("segment %s [%p:%p]", segment.name().c_str(), segment.startAddress(),
     //      segment.endAddress());
     //segment.print();
-   // place_pages_weighted_initial(segment.pageAlignedStartAddress(),
-   //                              segment.pageAlignedLength());
-    move_pages_initial(segment.pageAlignedStartAddress(),
-                                     segment.pageAlignedLength());
+    place_pages_weighted_initial(segment.pageAlignedStartAddress(),
+                                 segment.pageAlignedLength());
+    //move_pages_initial(segment.pageAlignedStartAddress(),
+    //                                 segment.pageAlignedLength());
   }
 }
 
