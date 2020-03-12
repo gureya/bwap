@@ -60,8 +60,7 @@ Run `make uninstall` to undo the effects of `make install`.
 
 ## Library Options
 There are a few options that can change the behavior of the library.
-These are specified via environment variables. check them here: https://github.com/gureya/bwap/blob/master/unstickymem.ini
-More information on this is coming soon
+These are specified via environment variables. check them here: [`unstickymem.ini`](https://github.com/gureya/bwap/blob/master/unstickymem.ini). More information on this is coming soon
 
 ## A tour of the source tree
 - We are using the [`CMake`](https://cmake.org) build system for this library.
@@ -86,5 +85,6 @@ Check for issues with the
 tag -- these are usually ideal as first
 issues or where development has been hampered.
 
+## Publication
 For more information and results see our original paper: **Bandwidth-Aware Page Placement in NUMA** (https://arxiv.org/abs/2003.03304),
 Accepted at 34th IEEE International Parallel & Distributed Processing Symposium (IPDPS), 2020
