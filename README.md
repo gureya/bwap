@@ -17,8 +17,8 @@ A lower stall rate means the CPU is less time idle waiting for a resource.
 We assume that the loss in memory bandwidth is compensated with a lower access
 latency.
 
-see the figure below for the architecture of BWAP
-![Control flow of BWAP](https://github.com/gureya/bwap/blob/master/bwap-diagram.xps)
+See the figure below for the architecture of BWAP:
+![Control flow of BWAP](https://github.com/gureya/bwap/blob/master/bwap-diagram.png)
 
 ## How do I use it?
 
