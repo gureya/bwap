@@ -17,7 +17,7 @@ A lower stall rate means the CPU is less time idle waiting for a resource.
 We assume that the loss in memory bandwidth is compensated with a lower access
 latency.
 
-See the figure below for the architecture of BWAP:
+See the figure below for the architecture of BWAP: `DWP tuner` represents the bwap-lib module
 ![Control flow of BWAP](https://github.com/gureya/bwap/blob/master/bwap-diagram.png)
 
 ## How do I use it?
