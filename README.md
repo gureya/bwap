@@ -72,7 +72,7 @@ C++ Style Guide](https://google.github.io/styleguide/cppguide.html)).
 
 ### Logical Components
 - The higher-level logic is found in [`unstickymem.cpp`](https://github.com/gureya/bwap/blob/master/src/unstickymem/unstickymem.cpp).
-- The logic to view/parse/modify the process memory map is in [`MemoryMap.cpp`] and [`MemorySegment.cpp`](https://github.com/gureya/bwap/tree/master/src/unstickymem/memory).
+- The logic to view/parse/modify the process memory map is in [`MemoryMap.cpp` & `MemorySegment.cpp`](https://github.com/gureya/bwap/tree/master/src/unstickymem/memory).
 - The logic to deal with hardware performance counters is in [`PerformanceCounters.cpp`](https://github.com/gureya/bwap/blob/master/src/unstickymem/PerformanceCounters.cpp)
 - Utility functions to simplify page placement and migration are in [`PagePlacement.cpp`](https://github.com/gureya/bwap/blob/master/src/unstickymem/PagePlacement.cpp)
 
